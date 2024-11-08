@@ -11,19 +11,9 @@ export type HomeArtistCard = {
   gradient: [string, string];
 };
 
-export type HomeMiniPlayer = {
-  id: string;
-  title: string;
-  artist: string;
-  gradient: [string, string];
-  isPlaying: boolean;
-  progress: number;
-};
-
 export type HomeViewModel = {
   recentlyPlayed: HomeTrackCard[];
   artists: HomeArtistCard[];
-  miniPlayer: HomeMiniPlayer;
 };
 
 // TODO: replace with real Audius data (recently played comes from local MMKV history, not Audius — no user accounts)
@@ -40,19 +30,9 @@ const MOCK_ARTISTS: HomeArtistCard[] = [
   {id: 'artist-4', name: 'Cassio', gradient: ['#06D6A0', '#88F7D4']},
 ];
 
-const MOCK_MINI_PLAYER: HomeMiniPlayer = {
-  id: 'track-1',
-  title: 'Starfall',
-  artist: 'Aria Nova',
-  gradient: ['#FF7A59', '#FFB199'],
-  isPlaying: true,
-  progress: 0.35,
-};
-
 export function useHomeViewModel(): HomeViewModel {
   return {
     recentlyPlayed: MOCK_RECENTLY_PLAYED,
     artists: MOCK_ARTISTS,
-    miniPlayer: MOCK_MINI_PLAYER,
   };
 }
