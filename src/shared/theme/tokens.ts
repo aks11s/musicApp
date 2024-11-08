@@ -1,14 +1,20 @@
 export const palette = {
   black: '#000000',
   white: '#FFFFFF',
-  ink900: '#0E0E12',
-  ink800: '#16161C',
-  ink700: '#1F1F27',
-  ink500: '#3A3A46',
-  ink300: '#8E8E9E',
-  ink100: '#C9C9D4',
-  accent: '#7C4DFF',
-  accentSoft: '#B39DFF',
+  // dark-mode surfaces
+  night900: '#0E0E12',
+  night800: '#16161C',
+  night700: '#1F1F27',
+  night500: '#3A3A46',
+  // neutrals (light theme, matches Figma)
+  textPrimary: '#1A1B1E',
+  textMuted: '#8A8B90',
+  textFaint: '#BFC0C4',
+  surfaceMuted: '#F5F5F6',
+  hairline: 'rgba(0,0,0,0.06)',
+  // brand
+  accent: '#F5871F',
+  accentSoft: '#FFA351',
   danger: '#FF5470',
 } as const;
 
@@ -30,16 +36,23 @@ export const radii = {
 
 export const typography = {
   sizes: {
-    caption: 12,
-    body: 14,
-    subtitle: 16,
-    title: 20,
-    heading: 28,
+    micro: 10.5,
+    caption: 11.5,
+    small: 12.5,
+    body: 13,
+    subtitle: 15,
+    title: 16,
+    heading: 21,
   },
   weights: {
     regular: '400',
-    medium: '500',
     semibold: '600',
     bold: '700',
+  },
+  // static font instances — pair with fontFamily, not fontWeight, to avoid synthetic bold
+  families: {
+    regular: 'Sora-Regular',
+    semibold: 'Sora-SemiBold',
+    bold: 'Sora-Bold',
   },
 } as const;

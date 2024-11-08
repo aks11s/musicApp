@@ -21,6 +21,6 @@ const stylesheet = createStyleSheet(theme => ({
   text: {
     color: theme.colors.text,
     fontSize: theme.typography.sizes.title,
-    fontWeight: theme.typography.weights.semibold,
+    fontFamily: theme.typography.families.semibold,
   },
 }));
