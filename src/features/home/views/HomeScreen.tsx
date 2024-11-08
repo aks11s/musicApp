@@ -1,26 +1,259 @@
-import React from 'react';
-import {Text, View} from 'react-native';
+import React, {useState} from 'react';
+import {ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
+import LinearGradient from 'react-native-linear-gradient';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {
+  useHomeViewModel,
+  type HomeArtistCard,
+  type HomeTrackCard,
+} from '../viewmodels/useHomeViewModel';
 
-export function HomeScreen(): React.JSX.Element {
+const SEGMENTS = ['Suggested', 'Songs', 'Artists', 'Albums'] as const;
+type Segment = (typeof SEGMENTS)[number];
+
+type TrackCardProps = {track: HomeTrackCard};
+
+function TrackCard({track}: TrackCardProps): React.JSX.Element {
   const {styles} = useStyles(stylesheet);
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Home</Text>
+    <View style={styles.trackCard}>
+      <LinearGradient
+        colors={track.gradient}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+        style={styles.trackArtwork}
+      />
+      <Text style={styles.trackTitle} numberOfLines={1}>
+        {track.title}
+      </Text>
+      <Text style={styles.trackArtist} numberOfLines={1}>
+        {track.artist}
+      </Text>
     </View>
+  );
+}
+
+type ArtistAvatarProps = {artist: HomeArtistCard};
+
+function ArtistAvatar({artist}: ArtistAvatarProps): React.JSX.Element {
+  const {styles} = useStyles(stylesheet);
+  return (
+    <View style={styles.artistCard}>
+      <LinearGradient
+        colors={artist.gradient}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+        style={styles.artistAvatar}
+      />
+      <Text style={styles.artistName} numberOfLines={1}>
+        {artist.name}
+      </Text>
+    </View>
+  );
+}
+
+export function HomeScreen(): React.JSX.Element {
+  const {styles, theme} = useStyles(stylesheet);
+  const {recentlyPlayed, artists} = useHomeViewModel();
+  const [activeSegment, setActiveSegment] = useState<Segment>('Suggested');
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={styles.header}>
+        <View style={styles.brand}>
+          <View style={styles.logoBadge}>
+            <Ionicons name="musical-notes" color={theme.colors.background} size={16} />
+          </View>
+          <Text style={styles.brandText}>Mivo</Text>
+        </View>
+        <TouchableOpacity style={styles.searchButton} accessibilityLabel="Search">
+          <Ionicons name="search" color={theme.colors.text} size={19} />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.segmentBar}>
+        {SEGMENTS.map(segment => {
+          const isActive = segment === activeSegment;
+          return (
+            <TouchableOpacity
+              key={segment}
+              style={styles.segmentItem}
+              onPress={() => setActiveSegment(segment)}>
+              <Text style={[styles.segmentLabel, isActive && styles.segmentLabelActive]}>
+                {segment}
+              </Text>
+              {isActive ? <View style={styles.segmentIndicator} /> : null}
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Recently Played</Text>
+          <Text style={styles.seeAll}>See All</Text>
+        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.trackList}>
+          {recentlyPlayed.map(track => (
+            <TrackCard key={track.id} track={track} />
+          ))}
+        </ScrollView>
+
+        <View style={[styles.sectionHeader, styles.sectionHeaderSpaced]}>
+          <Text style={styles.sectionTitle}>Artists</Text>
+          <Text style={styles.seeAll}>See All</Text>
+        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.artistList}>
+          {artists.map(artist => (
+            <ArtistAvatar key={artist.id} artist={artist} />
+          ))}
+        </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const stylesheet = createStyleSheet(theme => ({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: theme.colors.background,
   },
-  text: {
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: theme.spacing.xl,
+    paddingTop: theme.spacing.lg,
+    paddingBottom: theme.spacing.sm,
+  },
+  brand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+  },
+  logoBadge: {
+    width: 30,
+    height: 30,
+    borderRadius: 9,
+    backgroundColor: theme.colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  brandText: {
+    fontFamily: theme.typography.families.bold,
+    fontSize: theme.typography.sizes.heading,
     color: theme.colors.text,
-    fontSize: theme.typography.sizes.title,
+  },
+  searchButton: {
+    width: 40,
+    height: 40,
+    borderRadius: theme.radii.md,
+    backgroundColor: theme.colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  segmentBar: {
+    flexDirection: 'row',
+    gap: theme.spacing.xl - 2,
+    paddingHorizontal: theme.spacing.xl,
+    paddingTop: theme.spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  segmentItem: {
+    paddingTop: theme.spacing.xs + 2,
+    paddingBottom: theme.spacing.md,
+  },
+  segmentLabel: {
     fontFamily: theme.typography.families.semibold,
+    fontSize: theme.typography.sizes.subtitle,
+    color: theme.colors.textMuted,
+  },
+  segmentLabelActive: {
+    color: theme.colors.text,
+  },
+  segmentIndicator: {
+    position: 'absolute',
+    bottom: -1,
+    left: 0,
+    right: 0,
+    height: 2.5,
+    borderRadius: 2,
+    backgroundColor: theme.colors.accent,
+  },
+  content: {
+    paddingTop: theme.spacing.xl - 2,
+    paddingBottom: theme.spacing.xxl,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: theme.spacing.xl,
+    paddingBottom: theme.spacing.md + 2,
+  },
+  sectionHeaderSpaced: {
+    paddingTop: theme.spacing.lg,
+  },
+  sectionTitle: {
+    fontFamily: theme.typography.families.semibold,
+    fontSize: theme.typography.sizes.title,
+    color: theme.colors.text,
+  },
+  seeAll: {
+    fontFamily: theme.typography.families.semibold,
+    fontSize: theme.typography.sizes.small,
+    color: theme.colors.accent,
+  },
+  trackList: {
+    paddingHorizontal: theme.spacing.xl,
+    gap: theme.spacing.md + 2,
+  },
+  trackCard: {
+    width: 112,
+  },
+  trackArtwork: {
+    width: 112,
+    height: 112,
+    borderRadius: theme.radii.lg - 2,
+  },
+  trackTitle: {
+    fontFamily: theme.typography.families.semibold,
+    fontSize: theme.typography.sizes.body,
+    color: theme.colors.text,
+    paddingTop: theme.spacing.sm + 1,
+  },
+  trackArtist: {
+    fontFamily: theme.typography.families.regular,
+    fontSize: theme.typography.sizes.caption,
+    color: theme.colors.textMuted,
+  },
+  artistList: {
+    paddingHorizontal: theme.spacing.xl,
+    gap: theme.spacing.lg + 2,
+  },
+  artistCard: {
+    width: 88,
+    alignItems: 'center',
+    gap: theme.spacing.sm + 1,
+  },
+  artistAvatar: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+  },
+  artistName: {
+    fontFamily: theme.typography.families.semibold,
+    fontSize: theme.typography.sizes.small,
+    color: theme.colors.text,
+    textAlign: 'center',
   },
 }));
