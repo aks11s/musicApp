@@ -4,14 +4,15 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import {MiniPlayerBar} from '../features/player/views/MiniPlayerBar';
-import {TAB_BAR_HEIGHT} from './constants';
 import {TabNavigator} from './TabNavigator';
 import type {RootStackParamList} from './types';
+import {useTabBarHeight} from './useTabBarHeight';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator(): React.JSX.Element {
   const {styles} = useStyles(stylesheet);
+  const tabBarHeight = useTabBarHeight();
 
   return (
     <View style={styles.root}>
@@ -20,7 +21,9 @@ export function RootNavigator(): React.JSX.Element {
           <Stack.Screen name="Root" component={TabNavigator} />
         </Stack.Navigator>
       </NavigationContainer>
-      <View style={styles.miniPlayerSlot} pointerEvents="box-none">
+      <View
+        style={[styles.miniPlayerSlot, {bottom: tabBarHeight + 15}]}
+        pointerEvents="box-none">
         <MiniPlayerBar />
       </View>
     </View>
@@ -35,6 +38,5 @@ const stylesheet = createStyleSheet(_theme => ({
     position: 'absolute',
     left: 8,
     right: 8,
-    bottom: TAB_BAR_HEIGHT + 15,
   },
 }));
