@@ -1,8 +1,11 @@
 import {configureStore} from '@reduxjs/toolkit';
+import {baseApi} from '../services/api/baseApi';
 
-// no slices yet — a plain identity reducer keeps the store valid until the first one lands
 export const store = configureStore({
-  reducer: state => state,
+  reducer: {
+    [baseApi.reducerPath]: baseApi.reducer,
+  },
+  middleware: getDefaultMiddleware => getDefaultMiddleware().concat(baseApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
