@@ -1,3 +1,6 @@
+import {useGetTrendingTracksQuery} from '../../../services/api/tracks';
+import type {Track} from '../models/track.types';
+
 export type HomeTrackCard = {
   id: string;
   title: string;
@@ -14,6 +17,9 @@ export type HomeArtistCard = {
 export type HomeViewModel = {
   recentlyPlayed: HomeTrackCard[];
   artists: HomeArtistCard[];
+  mostPlayed: Track[];
+  isMostPlayedLoading: boolean;
+  isMostPlayedError: boolean;
 };
 
 // TODO: replace with real Audius data (recently played comes from local MMKV history, not Audius — no user accounts)
@@ -30,9 +36,14 @@ const MOCK_ARTISTS: HomeArtistCard[] = [
   {id: 'artist-4', name: 'Cassio', gradient: ['#06D6A0', '#88F7D4']},
 ];
 
-export function useHomeViewModel(): HomeViewModel {
+export const useHomeViewModel = (): HomeViewModel => {
+  const {data: mostPlayed, isLoading, isError} = useGetTrendingTracksQuery();
+
   return {
     recentlyPlayed: MOCK_RECENTLY_PLAYED,
     artists: MOCK_ARTISTS,
+    mostPlayed: mostPlayed ?? [],
+    isMostPlayedLoading: isLoading,
+    isMostPlayedError: isError,
   };
-}
+};
