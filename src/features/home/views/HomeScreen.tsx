@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import LinearGradient from 'react-native-linear-gradient';
@@ -9,6 +9,7 @@ import {
   type HomeArtistCard,
   type HomeTrackCard,
 } from '../viewmodels/useHomeViewModel';
+import type {Track} from '../models/track.types';
 
 const SEGMENTS = ['Suggested', 'Songs', 'Artists', 'Albums'] as const;
 type Segment = (typeof SEGMENTS)[number];
@@ -35,6 +36,23 @@ function TrackCard({track}: TrackCardProps): React.JSX.Element {
   );
 }
 
+type MostPlayedCardProps = {track: Track};
+
+const MostPlayedCard = ({track}: MostPlayedCardProps): React.JSX.Element => {
+  const {styles} = useStyles(stylesheet);
+  return (
+    <View style={styles.mostPlayedCard}>
+      <Image source={{uri: track.artworkUrl}} style={styles.mostPlayedArtwork} />
+      <Text style={styles.trackTitle} numberOfLines={1}>
+        {track.title}
+      </Text>
+      <Text style={styles.trackArtist} numberOfLines={1}>
+        {track.artist}
+      </Text>
+    </View>
+  );
+};
+
 type ArtistAvatarProps = {artist: HomeArtistCard};
 
 function ArtistAvatar({artist}: ArtistAvatarProps): React.JSX.Element {
@@ -54,9 +72,10 @@ function ArtistAvatar({artist}: ArtistAvatarProps): React.JSX.Element {
   );
 }
 
-export function HomeScreen(): React.JSX.Element {
+export const HomeScreen = (): React.JSX.Element => {
   const {styles, theme} = useStyles(stylesheet);
-  const {recentlyPlayed, artists} = useHomeViewModel();
+  const {recentlyPlayed, artists, mostPlayed, isMostPlayedLoading, isMostPlayedError} =
+    useHomeViewModel();
   const [activeSegment, setActiveSegment] = useState<Segment>('Suggested');
 
   return (
@@ -116,10 +135,31 @@ export function HomeScreen(): React.JSX.Element {
             <ArtistAvatar key={artist.id} artist={artist} />
           ))}
         </ScrollView>
+
+        <View style={[styles.sectionHeader, styles.sectionHeaderSpaced]}>
+          <Text style={styles.sectionTitle}>Most Played</Text>
+          <Text style={styles.seeAll}>See All</Text>
+        </View>
+        {isMostPlayedLoading ? (
+          <ActivityIndicator style={styles.mostPlayedStatus} color={theme.colors.accent} />
+        ) : isMostPlayedError ? (
+          <Text style={[styles.trackArtist, styles.mostPlayedStatus]}>
+            Couldn't load tracks
+          </Text>
+        ) : (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.mostPlayedList}>
+            {mostPlayed.map(track => (
+              <MostPlayedCard key={track.id} track={track} />
+            ))}
+          </ScrollView>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
-}
+};
 
 const stylesheet = createStyleSheet(theme => ({
   container: {
@@ -212,6 +252,22 @@ const stylesheet = createStyleSheet(theme => ({
     fontFamily: theme.typography.families.semibold,
     fontSize: theme.typography.sizes.small,
     color: theme.colors.accent,
+  },
+  mostPlayedList: {
+    paddingHorizontal: theme.spacing.xl,
+    gap: theme.spacing.md + 2,
+  },
+  mostPlayedCard: {
+    width: 128,
+  },
+  mostPlayedArtwork: {
+    width: 128,
+    height: 128,
+    borderRadius: theme.radii.lg,
+    backgroundColor: theme.colors.surface,
+  },
+  mostPlayedStatus: {
+    marginHorizontal: theme.spacing.xl,
   },
   trackList: {
     paddingHorizontal: theme.spacing.xl,
