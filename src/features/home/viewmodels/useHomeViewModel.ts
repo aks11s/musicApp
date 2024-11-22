@@ -1,5 +1,5 @@
 import {useGetTrendingTracksQuery} from '../../../services/api/tracks';
-import type {Track} from '../models/track.types';
+import type {Track} from '../models/types';
 
 export type HomeTrackCard = {
   id: string;

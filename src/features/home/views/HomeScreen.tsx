@@ -9,7 +9,7 @@ import {
   type HomeArtistCard,
   type HomeTrackCard,
 } from '../viewmodels/useHomeViewModel';
-import type {Track} from '../models/track.types';
+import type {Track} from '../models/types';
 
 const SEGMENTS = ['Suggested', 'Songs', 'Artists', 'Albums'] as const;
 type Segment = (typeof SEGMENTS)[number];

@@ -5,3 +5,10 @@ export type Track = {
   artworkUrl: string;
   durationSeconds: number;
 };
+
+export type Artist = {
+  id: string;
+  name: string;
+  handle: string;
+  avatarUrl: string;
+};

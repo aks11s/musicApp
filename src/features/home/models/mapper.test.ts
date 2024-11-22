@@ -1,5 +1,5 @@
-import {trackDtoSchema} from './track.schema';
-import {mapTrackDtoToTrack} from './track.mapper';
+import {trackDtoSchema, userDtoSchema} from './schema';
+import {mapTrackDtoToTrack, mapUserDtoToArtist} from './mapper';
 
 // recorded shape of a single item from GET /v1/tracks/trending
 const trendingTrackFixture = {
@@ -18,6 +18,20 @@ const trendingTrackFixture = {
     handle: 'novawave',
     name: 'Nova Wave',
     follower_count: 5210,
+  },
+};
+
+// recorded shape of a single item from GET /v1/users/search
+const userFixture = {
+  id: 'nP2mK',
+  handle: 'novawave',
+  name: 'Nova Wave',
+  follower_count: 5210,
+  is_verified: true,
+  profile_picture: {
+    '150x150': 'https://discoveryprovider.audius.co/profile/150x150.jpg',
+    '480x480': 'https://discoveryprovider.audius.co/profile/480x480.jpg',
+    '1000x1000': 'https://discoveryprovider.audius.co/profile/1000x1000.jpg',
   },
 };
 
@@ -49,5 +63,35 @@ describe('mapTrackDtoToTrack', () => {
     const dto = trackDtoSchema.parse({...trendingTrackFixture, artwork: null});
 
     expect(mapTrackDtoToTrack(dto).artworkUrl).toBe('');
+  });
+});
+
+describe('userDtoSchema', () => {
+  it('parses a recorded user response', () => {
+    expect(() => userDtoSchema.parse(userFixture)).not.toThrow();
+  });
+
+  it('accepts a user with no profile picture', () => {
+    const fixtureWithoutPicture = {...userFixture, profile_picture: null};
+    expect(() => userDtoSchema.parse(fixtureWithoutPicture)).not.toThrow();
+  });
+});
+
+describe('mapUserDtoToArtist', () => {
+  it('maps a DTO to the domain Artist shape', () => {
+    const dto = userDtoSchema.parse(userFixture);
+
+    expect(mapUserDtoToArtist(dto)).toEqual({
+      id: 'nP2mK',
+      name: 'Nova Wave',
+      handle: 'novawave',
+      avatarUrl: 'https://discoveryprovider.audius.co/profile/480x480.jpg',
+    });
+  });
+
+  it('falls back to an empty avatar url when profile picture is missing', () => {
+    const dto = userDtoSchema.parse({...userFixture, profile_picture: null});
+
+    expect(mapUserDtoToArtist(dto).avatarUrl).toBe('');
   });
 });

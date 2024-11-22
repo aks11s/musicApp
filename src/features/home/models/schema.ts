@@ -20,3 +20,21 @@ export const trackDtoSchema = z.object({
 });
 
 export type TrackDto = z.infer<typeof trackDtoSchema>;
+
+const profilePictureSchema = z
+  .object({
+    '150x150': z.string(),
+    '480x480': z.string(),
+    '1000x1000': z.string(),
+  })
+  .partial()
+  .nullable();
+
+export const userDtoSchema = z.object({
+  id: z.string(),
+  handle: z.string(),
+  name: z.string(),
+  profile_picture: profilePictureSchema,
+});
+
+export type UserDto = z.infer<typeof userDtoSchema>;
