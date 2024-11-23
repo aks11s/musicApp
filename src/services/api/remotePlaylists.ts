@@ -14,10 +14,6 @@ const playlistListResponseSchema = z.object({
   data: z.array(playlistDtoSchema),
 });
 
-const singlePlaylistResponseSchema = z.object({
-  data: playlistDtoSchema,
-});
-
 const trackListResponseSchema = z.object({
   data: z.array(trackDtoSchema),
 });
@@ -33,9 +29,10 @@ export const remotePlaylistsApi = baseApi.injectEndpoints({
     }),
     getPlaylist: build.query<RemotePlaylist, string>({
       query: playlistId => `/playlists/${playlistId}`,
+      // audius wraps a single playlist in a one-element array, not a bare object
       transformResponse: (response: unknown): RemotePlaylist => {
-        const {data} = singlePlaylistResponseSchema.parse(response);
-        return mapPlaylistDtoToRemotePlaylist(data);
+        const {data} = playlistListResponseSchema.parse(response);
+        return mapPlaylistDtoToRemotePlaylist(data[0]);
       },
     }),
     getPlaylistTracks: build.query<Track[], string>({
