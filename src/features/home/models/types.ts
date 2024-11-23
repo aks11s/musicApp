@@ -12,3 +12,11 @@ export type Artist = {
   handle: string;
   avatarUrl: string;
 };
+
+export type RemotePlaylist = {
+  id: string;
+  title: string;
+  curatorName: string;
+  artworkUrl: string;
+  trackCount: number;
+};

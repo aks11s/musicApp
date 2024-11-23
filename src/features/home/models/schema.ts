@@ -38,3 +38,15 @@ export const userDtoSchema = z.object({
 });
 
 export type UserDto = z.infer<typeof userDtoSchema>;
+
+export const playlistDtoSchema = z.object({
+  id: z.string(),
+  playlist_name: z.string(),
+  artwork: artworkSchema,
+  user: z.object({
+    name: z.string(),
+  }),
+  track_count: z.number(),
+});
+
+export type PlaylistDto = z.infer<typeof playlistDtoSchema>;
