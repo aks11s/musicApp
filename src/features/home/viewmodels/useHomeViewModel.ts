@@ -1,5 +1,6 @@
 import {useGetTrendingTracksQuery} from '../../../services/api/tracks';
-import type {Track} from '../models/types';
+import {useSearchUsersQuery} from '../../../services/api/users';
+import type {Artist, Track} from '../models/types';
 
 export type HomeTrackCard = {
   id: string;
@@ -8,15 +9,11 @@ export type HomeTrackCard = {
   gradient: [string, string];
 };
 
-export type HomeArtistCard = {
-  id: string;
-  name: string;
-  gradient: [string, string];
-};
-
 export type HomeViewModel = {
   recentlyPlayed: HomeTrackCard[];
-  artists: HomeArtistCard[];
+  artists: Artist[];
+  isArtistsLoading: boolean;
+  isArtistsError: boolean;
   mostPlayed: Track[];
   isMostPlayedLoading: boolean;
   isMostPlayedError: boolean;
@@ -29,21 +26,23 @@ const MOCK_RECENTLY_PLAYED: HomeTrackCard[] = [
   {id: 'track-3', title: 'Golden Hour', artist: 'Mona Vale', gradient: ['#00B4D8', '#90E0EF']},
 ];
 
-const MOCK_ARTISTS: HomeArtistCard[] = [
-  {id: 'artist-1', name: 'Aria Nova', gradient: ['#00B4D8', '#90E0EF']},
-  {id: 'artist-2', name: 'Wanderlights', gradient: ['#F5871F', '#FFD166']},
-  {id: 'artist-3', name: 'Mona Vale', gradient: ['#EF476F', '#FFA5BA']},
-  {id: 'artist-4', name: 'Cassio', gradient: ['#06D6A0', '#88F7D4']},
-];
+// TODO: Audius has no "trending users" endpoint — searchUsers is a text search, not real
+// personalization/discovery. Revisit once there's a better signal (e.g. artists behind Most Played).
+const ARTISTS_QUERY = 'music';
 
 export const useHomeViewModel = (): HomeViewModel => {
-  const {data: mostPlayed, isLoading, isError} = useGetTrendingTracksQuery();
+  const {data: mostPlayed, isLoading: isMostPlayedLoading, isError: isMostPlayedError} =
+    useGetTrendingTracksQuery();
+  const {data: artists, isLoading: isArtistsLoading, isError: isArtistsError} =
+    useSearchUsersQuery(ARTISTS_QUERY);
 
   return {
     recentlyPlayed: MOCK_RECENTLY_PLAYED,
-    artists: MOCK_ARTISTS,
+    artists: artists ?? [],
+    isArtistsLoading,
+    isArtistsError,
     mostPlayed: mostPlayed ?? [],
-    isMostPlayedLoading: isLoading,
-    isMostPlayedError: isError,
+    isMostPlayedLoading,
+    isMostPlayedError,
   };
 };

@@ -4,12 +4,8 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {
-  useHomeViewModel,
-  type HomeArtistCard,
-  type HomeTrackCard,
-} from '../viewmodels/useHomeViewModel';
-import type {Track} from '../models/types';
+import {useHomeViewModel, type HomeTrackCard} from '../viewmodels/useHomeViewModel';
+import type {Artist, Track} from '../models/types';
 
 const SEGMENTS = ['Suggested', 'Songs', 'Artists', 'Albums'] as const;
 type Segment = (typeof SEGMENTS)[number];
@@ -53,18 +49,13 @@ const MostPlayedCard = ({track}: MostPlayedCardProps): React.JSX.Element => {
   );
 };
 
-type ArtistAvatarProps = {artist: HomeArtistCard};
+type ArtistAvatarProps = {artist: Artist};
 
 function ArtistAvatar({artist}: ArtistAvatarProps): React.JSX.Element {
   const {styles} = useStyles(stylesheet);
   return (
     <View style={styles.artistCard}>
-      <LinearGradient
-        colors={artist.gradient}
-        start={{x: 0, y: 0}}
-        end={{x: 1, y: 1}}
-        style={styles.artistAvatar}
-      />
+      <Image source={{uri: artist.avatarUrl}} style={styles.artistAvatar} />
       <Text style={styles.artistName} numberOfLines={1}>
         {artist.name}
       </Text>
@@ -74,8 +65,15 @@ function ArtistAvatar({artist}: ArtistAvatarProps): React.JSX.Element {
 
 export const HomeScreen = (): React.JSX.Element => {
   const {styles, theme} = useStyles(stylesheet);
-  const {recentlyPlayed, artists, mostPlayed, isMostPlayedLoading, isMostPlayedError} =
-    useHomeViewModel();
+  const {
+    recentlyPlayed,
+    artists,
+    isArtistsLoading,
+    isArtistsError,
+    mostPlayed,
+    isMostPlayedLoading,
+    isMostPlayedError,
+  } = useHomeViewModel();
   const [activeSegment, setActiveSegment] = useState<Segment>('Suggested');
 
   return (
@@ -127,14 +125,22 @@ export const HomeScreen = (): React.JSX.Element => {
           <Text style={styles.sectionTitle}>Artists</Text>
           <Text style={styles.seeAll}>See All</Text>
         </View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.artistList}>
-          {artists.map(artist => (
-            <ArtistAvatar key={artist.id} artist={artist} />
-          ))}
-        </ScrollView>
+        {isArtistsLoading ? (
+          <ActivityIndicator style={styles.mostPlayedStatus} color={theme.colors.accent} />
+        ) : isArtistsError ? (
+          <Text style={[styles.trackArtist, styles.mostPlayedStatus]}>
+            Couldn't load artists
+          </Text>
+        ) : (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.artistList}>
+            {artists.map(artist => (
+              <ArtistAvatar key={artist.id} artist={artist} />
+            ))}
+          </ScrollView>
+        )}
 
         <View style={[styles.sectionHeader, styles.sectionHeaderSpaced]}>
           <Text style={styles.sectionTitle}>Most Played</Text>
