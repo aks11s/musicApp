@@ -1,6 +1,9 @@
 import {useGetTrendingTracksQuery} from '../../../services/api/tracks';
 import {useSearchUsersQuery} from '../../../services/api/users';
+import {selectMostPopularArtists} from '../models/selectors';
 import type {Artist, Track} from '../models/types';
+
+const TOP_ARTISTS_LIMIT = 7;
 
 export type HomeTrackCard = {
   id: string;
@@ -26,8 +29,8 @@ const MOCK_RECENTLY_PLAYED: HomeTrackCard[] = [
   {id: 'track-3', title: 'Golden Hour', artist: 'Mona Vale', gradient: ['#00B4D8', '#90E0EF']},
 ];
 
-// TODO: Audius has no "trending users" endpoint — searchUsers is a text search, not real
-// personalization/discovery. Revisit once there's a better signal (e.g. artists behind Most Played).
+// TODO: Audius has no "top artists" endpoint — searchUsers is a text search, not a global
+// ranking. This is a candidate pool, ranked by followerCount in models/selectors.ts.
 const ARTISTS_QUERY = 'music';
 
 export const useHomeViewModel = (): HomeViewModel => {
@@ -38,7 +41,7 @@ export const useHomeViewModel = (): HomeViewModel => {
 
   return {
     recentlyPlayed: MOCK_RECENTLY_PLAYED,
-    artists: artists ?? [],
+    artists: artists ? selectMostPopularArtists(artists, TOP_ARTISTS_LIMIT) : [],
     isArtistsLoading,
     isArtistsError,
     mostPlayed: mostPlayed ?? [],

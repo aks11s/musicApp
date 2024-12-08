@@ -14,6 +14,7 @@ export const mapUserDtoToArtist = (dto: UserDto): Artist => ({
   name: dto.name,
   handle: dto.handle,
   avatarUrl: dto.profile_picture?.['480x480'] ?? dto.profile_picture?.['150x150'] ?? '',
+  followerCount: dto.follower_count,
 });
 
 export const mapPlaylistDtoToRemotePlaylist = (dto: PlaylistDto): RemotePlaylist => ({

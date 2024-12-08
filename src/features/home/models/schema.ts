@@ -34,6 +34,7 @@ export const userDtoSchema = z.object({
   id: z.string(),
   handle: z.string(),
   name: z.string(),
+  follower_count: z.number(),
   profile_picture: profilePictureSchema,
 });
 
