@@ -1,3 +1,5 @@
+import {HOME_SEGMENTS} from './constants';
+
 export type Track = {
   id: string;
   title: string;
@@ -21,3 +23,5 @@ export type RemotePlaylist = {
   artworkUrl: string;
   trackCount: number;
 };
+
+export type HomeSegment = (typeof HOME_SEGMENTS)[number];

@@ -1,14 +1,12 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useHomeViewModel, type HomeTrackCard} from '../viewmodels/useHomeViewModel';
+import {HOME_SEGMENTS} from '../models/constants';
 import type {Artist, Track} from '../models/types';
-
-const SEGMENTS = ['Suggested', 'Songs', 'Artists', 'Albums'] as const;
-type Segment = (typeof SEGMENTS)[number];
 
 type TrackCardProps = {track: HomeTrackCard};
 
@@ -66,6 +64,8 @@ function ArtistAvatar({artist}: ArtistAvatarProps): React.JSX.Element {
 export const HomeScreen = (): React.JSX.Element => {
   const {styles, theme} = useStyles(stylesheet);
   const {
+    activeSegment,
+    setActiveSegment,
     recentlyPlayed,
     artists,
     isArtistsLoading,
@@ -74,7 +74,6 @@ export const HomeScreen = (): React.JSX.Element => {
     isMostPlayedLoading,
     isMostPlayedError,
   } = useHomeViewModel();
-  const [activeSegment, setActiveSegment] = useState<Segment>('Suggested');
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -91,7 +90,7 @@ export const HomeScreen = (): React.JSX.Element => {
       </View>
 
       <View style={styles.segmentBar}>
-        {SEGMENTS.map(segment => {
+        {HOME_SEGMENTS.map(segment => {
           const isActive = segment === activeSegment;
           return (
             <TouchableOpacity
@@ -303,14 +302,14 @@ const stylesheet = createStyleSheet(theme => ({
     gap: theme.spacing.lg + 2,
   },
   artistCard: {
-    width: 88,
+    width: 96,
     alignItems: 'center',
     gap: theme.spacing.sm + 1,
   },
   artistAvatar: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+    width: 96,
+    height: 96,
+    borderRadius: 48,
   },
   artistName: {
     fontFamily: theme.typography.families.semibold,

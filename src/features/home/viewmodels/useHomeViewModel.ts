@@ -1,7 +1,8 @@
+import {useState} from 'react';
 import {useGetTrendingTracksQuery} from '../../../services/api/tracks';
 import {useSearchUsersQuery} from '../../../services/api/users';
 import {selectMostPopularArtists} from '../models/selectors';
-import type {Artist, Track} from '../models/types';
+import type {Artist, HomeSegment, Track} from '../models/types';
 
 const TOP_ARTISTS_LIMIT = 7;
 
@@ -13,6 +14,8 @@ export type HomeTrackCard = {
 };
 
 export type HomeViewModel = {
+  activeSegment: HomeSegment;
+  setActiveSegment: (segment: HomeSegment) => void;
   recentlyPlayed: HomeTrackCard[];
   artists: Artist[];
   isArtistsLoading: boolean;
@@ -34,12 +37,15 @@ const MOCK_RECENTLY_PLAYED: HomeTrackCard[] = [
 const ARTISTS_QUERY = 'music';
 
 export const useHomeViewModel = (): HomeViewModel => {
+  const [activeSegment, setActiveSegment] = useState<HomeSegment>('Suggested');
   const {data: mostPlayed, isLoading: isMostPlayedLoading, isError: isMostPlayedError} =
     useGetTrendingTracksQuery();
   const {data: artists, isLoading: isArtistsLoading, isError: isArtistsError} =
     useSearchUsersQuery(ARTISTS_QUERY);
 
   return {
+    activeSegment,
+    setActiveSegment,
     recentlyPlayed: MOCK_RECENTLY_PLAYED,
     artists: artists ? selectMostPopularArtists(artists, TOP_ARTISTS_LIMIT) : [],
     isArtistsLoading,
