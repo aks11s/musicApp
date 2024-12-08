@@ -4,9 +4,9 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {useHomeViewModel, type HomeTrackCard} from '../viewmodels/useHomeViewModel';
+import {useHomeViewModel} from '../viewmodels/useHomeViewModel';
 import {HOME_SEGMENTS} from '../models/constants';
-import type {Artist, Track} from '../models/types';
+import type {Artist, HomeTrackCard, Track} from '../models/types';
 
 type TrackCardProps = {track: HomeTrackCard};
 

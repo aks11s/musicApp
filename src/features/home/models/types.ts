@@ -25,3 +25,12 @@ export type RemotePlaylist = {
 };
 
 export type HomeSegment = (typeof HOME_SEGMENTS)[number];
+
+// Recently played has no real source yet, so the card carries a placeholder gradient
+// instead of an artwork URL.
+export type HomeTrackCard = {
+  id: string;
+  title: string;
+  artist: string;
+  gradient: [string, string];
+};
