@@ -5,6 +5,7 @@ import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useHomeViewModel} from '../viewmodels/useHomeViewModel';
+import {useSuggestedViewModel} from '../viewmodels/useSuggestedViewModel';
 import {HOME_SEGMENTS} from '../models/constants';
 import type {Artist, HomeTrackCard, Track} from '../models/types';
 
@@ -63,9 +64,8 @@ function ArtistAvatar({artist}: ArtistAvatarProps): React.JSX.Element {
 
 export const HomeScreen = (): React.JSX.Element => {
   const {styles, theme} = useStyles(stylesheet);
+  const {activeSegment, setActiveSegment} = useHomeViewModel();
   const {
-    activeSegment,
-    setActiveSegment,
     recentlyPlayed,
     artists,
     isArtistsLoading,
@@ -73,7 +73,7 @@ export const HomeScreen = (): React.JSX.Element => {
     mostPlayed,
     isMostPlayedLoading,
     isMostPlayedError,
-  } = useHomeViewModel();
+  } = useSuggestedViewModel();
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
