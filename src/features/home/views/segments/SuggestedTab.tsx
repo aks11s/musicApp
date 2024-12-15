@@ -1,0 +1,60 @@
+import React from 'react';
+import {ScrollView} from 'react-native';
+import {createStyleSheet, useStyles} from 'react-native-unistyles';
+import {HorizontalSection} from '../../../../shared/ui/HorizontalSection';
+import {useSuggestedViewModel} from '../../viewmodels/useSuggestedViewModel';
+import {ArtistAvatar} from '../components/ArtistAvatar';
+import {MostPlayedCard} from '../components/MostPlayedCard';
+import {TrackCard} from '../components/TrackCard';
+
+export const SuggestedTab = (): React.JSX.Element => {
+  const {styles, theme} = useStyles(stylesheet);
+  const {
+    recentlyPlayed,
+    artists,
+    isArtistsLoading,
+    isArtistsError,
+    mostPlayed,
+    isMostPlayedLoading,
+    isMostPlayedError,
+  } = useSuggestedViewModel();
+
+  return (
+    <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <HorizontalSection title="Recently Played" gap={theme.spacing.md + 2} isFirst>
+        {recentlyPlayed.map(track => (
+          <TrackCard key={track.id} track={track} />
+        ))}
+      </HorizontalSection>
+
+      <HorizontalSection
+        title="Artists"
+        gap={theme.spacing.lg + 2}
+        isLoading={isArtistsLoading}
+        isError={isArtistsError}
+        errorText="Couldn't load artists">
+        {artists.map(artist => (
+          <ArtistAvatar key={artist.id} artist={artist} />
+        ))}
+      </HorizontalSection>
+
+      <HorizontalSection
+        title="Most Played"
+        gap={theme.spacing.md + 2}
+        isLoading={isMostPlayedLoading}
+        isError={isMostPlayedError}
+        errorText="Couldn't load tracks">
+        {mostPlayed.map(track => (
+          <MostPlayedCard key={track.id} track={track} />
+        ))}
+      </HorizontalSection>
+    </ScrollView>
+  );
+};
+
+const stylesheet = createStyleSheet(theme => ({
+  content: {
+    paddingTop: theme.spacing.xl - 2,
+    paddingBottom: theme.spacing.xxl,
+  },
+}));
