@@ -1,12 +1,12 @@
 import React from 'react';
-import {ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {ActivityIndicator, Image, ScrollView, Text, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import LinearGradient from 'react-native-linear-gradient';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useHomeViewModel} from '../viewmodels/useHomeViewModel';
 import {useSuggestedViewModel} from '../viewmodels/useSuggestedViewModel';
-import {HOME_SEGMENTS} from '../models/constants';
+import {HomeHeader} from './components/HomeHeader';
+import {SegmentBar} from './components/SegmentBar';
 import type {Artist, HomeTrackCard, Track} from '../models/types';
 
 type TrackCardProps = {track: HomeTrackCard};
@@ -77,34 +77,9 @@ export const HomeScreen = (): React.JSX.Element => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <View style={styles.brand}>
-          <View style={styles.logoBadge}>
-            <Ionicons name="musical-notes" color={theme.colors.background} size={16} />
-          </View>
-          <Text style={styles.brandText}>Mivo</Text>
-        </View>
-        <TouchableOpacity style={styles.searchButton} accessibilityLabel="Search">
-          <Ionicons name="search" color={theme.colors.text} size={19} />
-        </TouchableOpacity>
-      </View>
+      <HomeHeader />
 
-      <View style={styles.segmentBar}>
-        {HOME_SEGMENTS.map(segment => {
-          const isActive = segment === activeSegment;
-          return (
-            <TouchableOpacity
-              key={segment}
-              style={styles.segmentItem}
-              onPress={() => setActiveSegment(segment)}>
-              <Text style={[styles.segmentLabel, isActive && styles.segmentLabelActive]}>
-                {segment}
-              </Text>
-              {isActive ? <View style={styles.segmentIndicator} /> : null}
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+      <SegmentBar activeSegment={activeSegment} onSelect={setActiveSegment} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.sectionHeader}>
@@ -170,69 +145,6 @@ const stylesheet = createStyleSheet(theme => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: theme.spacing.xl,
-    paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.sm,
-  },
-  brand: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 9,
-  },
-  logoBadge: {
-    width: 30,
-    height: 30,
-    borderRadius: 9,
-    backgroundColor: theme.colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  brandText: {
-    fontFamily: theme.typography.families.bold,
-    fontSize: theme.typography.sizes.heading,
-    color: theme.colors.text,
-  },
-  searchButton: {
-    width: 40,
-    height: 40,
-    borderRadius: theme.radii.md,
-    backgroundColor: theme.colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  segmentBar: {
-    flexDirection: 'row',
-    gap: theme.spacing.xl - 2,
-    paddingHorizontal: theme.spacing.xl,
-    paddingTop: theme.spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  segmentItem: {
-    paddingTop: theme.spacing.xs + 2,
-    paddingBottom: theme.spacing.md,
-  },
-  segmentLabel: {
-    fontFamily: theme.typography.families.semibold,
-    fontSize: theme.typography.sizes.subtitle,
-    color: theme.colors.textMuted,
-  },
-  segmentLabelActive: {
-    color: theme.colors.text,
-  },
-  segmentIndicator: {
-    position: 'absolute',
-    bottom: -1,
-    left: 0,
-    right: 0,
-    height: 2.5,
-    borderRadius: 2,
-    backgroundColor: theme.colors.accent,
   },
   content: {
     paddingTop: theme.spacing.xl - 2,
