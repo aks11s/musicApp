@@ -29,12 +29,12 @@ export const TrackCard = ({track}: TrackCardProps): React.JSX.Element => {
 
 const stylesheet = createStyleSheet(theme => ({
   trackCard: {
-    width: 112,
+    width: 128,
   },
   trackArtwork: {
-    width: 112,
-    height: 112,
-    borderRadius: theme.radii.lg - 2,
+    width: 128,
+    height: 128,
+    borderRadius: theme.radii.lg,
   },
   trackTitle: {
     fontFamily: theme.typography.families.semibold,
