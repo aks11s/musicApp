@@ -1,5 +1,5 @@
 import React from 'react';
-import {ActivityIndicator, ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 
 type HorizontalSectionProps = {
@@ -7,6 +7,9 @@ type HorizontalSectionProps = {
   gap: number;
   children: React.ReactNode;
   isLoading?: boolean;
+  // shown in place of the list while loading — the section itself knows nothing
+  // about the shape of the cards it holds
+  skeleton?: React.ReactNode;
   isError?: boolean;
   errorText?: string;
   onSeeAll?: () => void;
@@ -19,12 +22,13 @@ export const HorizontalSection = ({
   gap,
   children,
   isLoading,
+  skeleton,
   isError,
   errorText,
   onSeeAll,
   isFirst,
 }: HorizontalSectionProps): React.JSX.Element => {
-  const {styles, theme} = useStyles(stylesheet);
+  const {styles} = useStyles(stylesheet);
 
   return (
     <View>
@@ -34,16 +38,15 @@ export const HorizontalSection = ({
           <Text style={styles.seeAll}>See All</Text>
         </TouchableOpacity>
       </View>
-      {isLoading ? (
-        <ActivityIndicator style={styles.status} color={theme.colors.accent} />
-      ) : isError ? (
+      {isError ? (
         <Text style={[styles.errorText, styles.status]}>{errorText}</Text>
       ) : (
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
+          scrollEnabled={!isLoading}
           contentContainerStyle={[styles.list, {gap}]}>
-          {children}
+          {isLoading ? skeleton : children}
         </ScrollView>
       )}
     </View>

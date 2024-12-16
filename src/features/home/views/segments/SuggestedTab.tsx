@@ -4,8 +4,10 @@ import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import {HorizontalSection} from '../../../../shared/ui/HorizontalSection';
 import {useSuggestedViewModel} from '../../viewmodels/useSuggestedViewModel';
 import {ArtistAvatar} from '../components/ArtistAvatar';
+import {ArtistAvatarSkeletonRow} from '../loaders/ArtistAvatarSkeleton';
 import {MostPlayedCard} from '../components/MostPlayedCard';
 import {TrackCard} from '../components/TrackCard';
+import {TrackCardSkeletonRow} from '../loaders/TrackCardSkeleton';
 
 export const SuggestedTab = (): React.JSX.Element => {
   const {styles, theme} = useStyles(stylesheet);
@@ -31,6 +33,7 @@ export const SuggestedTab = (): React.JSX.Element => {
         title="Artists"
         gap={theme.spacing.lg + 2}
         isLoading={isArtistsLoading}
+        skeleton={<ArtistAvatarSkeletonRow />}
         isError={isArtistsError}
         errorText="Couldn't load artists">
         {artists.map(artist => (
@@ -42,6 +45,7 @@ export const SuggestedTab = (): React.JSX.Element => {
         title="Most Played"
         gap={theme.spacing.md + 2}
         isLoading={isMostPlayedLoading}
+        skeleton={<TrackCardSkeletonRow />}
         isError={isMostPlayedError}
         errorText="Couldn't load tracks">
         {mostPlayed.map(track => (
