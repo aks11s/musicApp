@@ -32,6 +32,13 @@ export const usersApi = baseApi.injectEndpoints({
         return data.map(mapTrackDtoToTrack);
       },
     }),
+    getTopArtists: build.query<Artist[], number>({
+      query: limit => `/users/top?limit=${limit}`,
+      transformResponse: (response: unknown): Artist[] => {
+        const {data} = userListResponseSchema.parse(response);
+        return data.map(mapUserDtoToArtist);
+      },
+    }),
     searchUsers: build.query<Artist[], string>({
       query: searchQuery => `/users/search?query=${encodeURIComponent(searchQuery)}`,
       transformResponse: (response: unknown): Artist[] => {
@@ -43,4 +50,9 @@ export const usersApi = baseApi.injectEndpoints({
   overrideExisting: __DEV__,
 });
 
-export const {useGetUserQuery, useGetUserTracksQuery, useSearchUsersQuery} = usersApi;
+export const {
+  useGetUserQuery,
+  useGetUserTracksQuery,
+  useGetTopArtistsQuery,
+  useSearchUsersQuery,
+} = usersApi;

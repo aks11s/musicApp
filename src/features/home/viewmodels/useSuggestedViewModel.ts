@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {useGetTrendingTracksQuery} from '../../../services/api/tracks';
-import {useSearchUsersQuery} from '../../../services/api/users';
-import {ARTISTS_QUERY, TOP_ARTISTS_LIMIT} from '../models/constants';
+import {useGetTopArtistsQuery} from '../../../services/api/users';
+import {TOP_ARTISTS_LIMIT} from '../models/constants';
 import {getRecentlyPlayed} from '../models/recentlyPlayed.repository';
 import {selectMostPopularArtists} from '../models/selectors';
 import type {Artist, Track} from '../models/types';
@@ -22,7 +22,7 @@ export const useSuggestedViewModel = (): SuggestedViewModel => {
   const {data: mostPlayed, isLoading: isMostPlayedLoading, isError: isMostPlayedError} =
     useGetTrendingTracksQuery();
   const {data: artists, isLoading: isArtistsLoading, isError: isArtistsError} =
-    useSearchUsersQuery(ARTISTS_QUERY);
+    useGetTopArtistsQuery(TOP_ARTISTS_LIMIT);
 
   return {
     recentlyPlayed,
