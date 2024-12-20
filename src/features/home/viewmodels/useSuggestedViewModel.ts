@@ -1,12 +1,13 @@
+import {useState} from 'react';
 import {useGetTrendingTracksQuery} from '../../../services/api/tracks';
 import {useSearchUsersQuery} from '../../../services/api/users';
 import {ARTISTS_QUERY, TOP_ARTISTS_LIMIT} from '../models/constants';
-import {MOCK_RECENTLY_PLAYED} from '../models/mocks';
+import {getRecentlyPlayed} from '../models/recentlyPlayed.repository';
 import {selectMostPopularArtists} from '../models/selectors';
-import type {Artist, HomeTrackCard, Track} from '../models/types';
+import type {Artist, Track} from '../models/types';
 
 export type SuggestedViewModel = {
-  recentlyPlayed: HomeTrackCard[];
+  recentlyPlayed: Track[];
   artists: Artist[];
   isArtistsLoading: boolean;
   isArtistsError: boolean;
@@ -16,13 +17,15 @@ export type SuggestedViewModel = {
 };
 
 export const useSuggestedViewModel = (): SuggestedViewModel => {
+
+  const [recentlyPlayed] = useState(getRecentlyPlayed);
   const {data: mostPlayed, isLoading: isMostPlayedLoading, isError: isMostPlayedError} =
     useGetTrendingTracksQuery();
   const {data: artists, isLoading: isArtistsLoading, isError: isArtistsError} =
     useSearchUsersQuery(ARTISTS_QUERY);
 
   return {
-    recentlyPlayed: MOCK_RECENTLY_PLAYED,
+    recentlyPlayed,
     artists: artists ? selectMostPopularArtists(artists, TOP_ARTISTS_LIMIT) : [],
     isArtistsLoading,
     isArtistsError,

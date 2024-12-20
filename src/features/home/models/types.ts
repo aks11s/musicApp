@@ -25,11 +25,3 @@ export type RemotePlaylist = {
 };
 
 export type HomeSegment = (typeof HOME_SEGMENTS)[number];
-
-
-export type HomeTrackCard = {
-  id: string;
-  title: string;
-  artist: string;
-  gradient: [string, string];
-};

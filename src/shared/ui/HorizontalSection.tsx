@@ -12,6 +12,9 @@ type HorizontalSectionProps = {
   skeleton?: React.ReactNode;
   isError?: boolean;
   errorText?: string;
+  // rendered instead of the list when there is nothing to show
+  isEmpty?: boolean;
+  empty?: React.ReactNode;
   onSeeAll?: () => void;
   // first section on a screen sits tighter under the segment bar
   isFirst?: boolean;
@@ -25,6 +28,8 @@ export const HorizontalSection = ({
   skeleton,
   isError,
   errorText,
+  isEmpty,
+  empty,
   onSeeAll,
   isFirst,
 }: HorizontalSectionProps): React.JSX.Element => {
@@ -40,6 +45,8 @@ export const HorizontalSection = ({
       </View>
       {isError ? (
         <Text style={[styles.errorText, styles.status]}>{errorText}</Text>
+      ) : isEmpty && !isLoading ? (
+        empty
       ) : (
         <ScrollView
           horizontal

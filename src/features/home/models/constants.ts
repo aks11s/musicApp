@@ -7,3 +7,5 @@ export const ARTISTS_QUERY = 'music';
 export const SKELETON_COUNT = 4;
 
 export const RECENTLY_PLAYED_LIMIT = 20;
+export const TRACK_CARD_SIZE = 128;
+export const RECENTLY_PLAYED_CARD_SIZE = 112;

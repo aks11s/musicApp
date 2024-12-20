@@ -1,11 +1,12 @@
 import React from 'react';
 import {ScrollView} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
+import {EmptyState} from '../../../../shared/ui/EmptyState';
 import {HorizontalSection} from '../../../../shared/ui/HorizontalSection';
+import {RECENTLY_PLAYED_CARD_SIZE, TRACK_CARD_SIZE} from '../../models/constants';
 import {useSuggestedViewModel} from '../../viewmodels/useSuggestedViewModel';
 import {ArtistAvatar} from '../components/ArtistAvatar';
 import {ArtistAvatarSkeletonRow} from '../loaders/ArtistAvatarSkeleton';
-import {MostPlayedCard} from '../components/MostPlayedCard';
 import {TrackCard} from '../components/TrackCard';
 import {TrackCardSkeletonRow} from '../loaders/TrackCardSkeleton';
 
@@ -23,9 +24,20 @@ export const SuggestedTab = (): React.JSX.Element => {
 
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <HorizontalSection title="Recently Played" gap={theme.spacing.md + 2} isFirst>
+      <HorizontalSection
+        title="Recently Played"
+        gap={theme.spacing.md + 2}
+        isEmpty={recentlyPlayed.length === 0}
+        empty={
+          <EmptyState
+            icon="musical-note-outline"
+            text="Nothing played yet"
+            minHeight={RECENTLY_PLAYED_CARD_SIZE}
+          />
+        }
+        isFirst>
         {recentlyPlayed.map(track => (
-          <TrackCard key={track.id} track={track} />
+          <TrackCard key={track.id} track={track} size={RECENTLY_PLAYED_CARD_SIZE} />
         ))}
       </HorizontalSection>
 
@@ -49,7 +61,7 @@ export const SuggestedTab = (): React.JSX.Element => {
         isError={isMostPlayedError}
         errorText="Couldn't load tracks">
         {mostPlayed.map(track => (
-          <MostPlayedCard key={track.id} track={track} />
+          <TrackCard key={track.id} track={track} size={TRACK_CARD_SIZE} />
         ))}
       </HorizontalSection>
     </ScrollView>
