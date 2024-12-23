@@ -7,15 +7,14 @@ type HorizontalSectionProps = {
   gap: number;
   children: React.ReactNode;
   isLoading?: boolean;
-  // shown in place of the list while loading — the section itself knows nothing
-  // about the shape of the cards it holds
   skeleton?: React.ReactNode;
   isError?: boolean;
   errorText?: string;
-  // rendered instead of the list when there is nothing to show
   isEmpty?: boolean;
   empty?: React.ReactNode;
   onSeeAll?: () => void;
+  // some sections have no screen behind them at all, so they show no See All
+  hideSeeAll?: boolean;
   // first section on a screen sits tighter under the segment bar
   isFirst?: boolean;
 };
@@ -31,6 +30,7 @@ export const HorizontalSection = ({
   isEmpty,
   empty,
   onSeeAll,
+  hideSeeAll,
   isFirst,
 }: HorizontalSectionProps): React.JSX.Element => {
   const {styles} = useStyles(stylesheet);
@@ -39,9 +39,11 @@ export const HorizontalSection = ({
     <View>
       <View style={[styles.header, !isFirst && styles.headerSpaced]}>
         <Text style={styles.title}>{title}</Text>
-        <TouchableOpacity onPress={onSeeAll} disabled={!onSeeAll}>
-          <Text style={styles.seeAll}>See All</Text>
-        </TouchableOpacity>
+        {hideSeeAll ? null : (
+          <TouchableOpacity onPress={onSeeAll} disabled={!onSeeAll}>
+            <Text style={styles.seeAll}>See All</Text>
+          </TouchableOpacity>
+        )}
       </View>
       {isError ? (
         <Text style={[styles.errorText, styles.status]}>{errorText}</Text>

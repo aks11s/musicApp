@@ -14,30 +14,40 @@ export const SuggestedTab = (): React.JSX.Element => {
   const {styles, theme} = useStyles(stylesheet);
   const {
     recentlyPlayed,
+    hasRecentlyPlayed,
     artists,
     isArtistsLoading,
     isArtistsError,
     mostPlayed,
     isMostPlayedLoading,
     isMostPlayedError,
+    underground,
+    isUndergroundLoading,
+    isUndergroundError,
   } = useSuggestedViewModel();
 
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      {hasRecentlyPlayed ? (
+        <HorizontalSection title="Recently Played" gap={theme.spacing.md + 2} isFirst>
+          {recentlyPlayed.map(track => (
+            <TrackCard key={track.id} track={track} size={RECENTLY_PLAYED_CARD_SIZE} />
+          ))}
+        </HorizontalSection>
+      ) : null}
+
       <HorizontalSection
-        title="Recently Played"
+        title="Most Played"
         gap={theme.spacing.md + 2}
-        isEmpty={recentlyPlayed.length === 0}
-        empty={
-          <EmptyState
-            icon="musical-note-outline"
-            text="Nothing played yet"
-            minHeight={RECENTLY_PLAYED_CARD_SIZE}
-          />
-        }
-        isFirst>
-        {recentlyPlayed.map(track => (
-          <TrackCard key={track.id} track={track} size={RECENTLY_PLAYED_CARD_SIZE} />
+        isLoading={isMostPlayedLoading}
+        skeleton={<TrackCardSkeletonRow />}
+        isError={isMostPlayedError}
+        errorText="Couldn't load tracks"
+        isEmpty={mostPlayed.length === 0}
+        empty={<EmptyState icon="musical-note-outline" text="No tracks right now" />}
+        isFirst={!hasRecentlyPlayed}>
+        {mostPlayed.map(track => (
+          <TrackCard key={track.id} track={track} size={TRACK_CARD_SIZE} />
         ))}
       </HorizontalSection>
 
@@ -47,20 +57,25 @@ export const SuggestedTab = (): React.JSX.Element => {
         isLoading={isArtistsLoading}
         skeleton={<ArtistAvatarSkeletonRow />}
         isError={isArtistsError}
-        errorText="Couldn't load artists">
+        errorText="Couldn't load artists"
+        isEmpty={artists.length === 0}
+        empty={<EmptyState icon="person-outline" text="No artists right now" />}>
         {artists.map(artist => (
           <ArtistAvatar key={artist.id} artist={artist} />
         ))}
       </HorizontalSection>
 
       <HorizontalSection
-        title="Most Played"
+        title="Fresh Finds"
         gap={theme.spacing.md + 2}
-        isLoading={isMostPlayedLoading}
+        isLoading={isUndergroundLoading}
         skeleton={<TrackCardSkeletonRow />}
-        isError={isMostPlayedError}
-        errorText="Couldn't load tracks">
-        {mostPlayed.map(track => (
+        isError={isUndergroundError}
+        errorText="Couldn't load tracks"
+        isEmpty={underground.length === 0}
+        empty={<EmptyState icon="musical-note-outline" text="No tracks right now" />}
+        hideSeeAll>
+        {underground.map(track => (
           <TrackCard key={track.id} track={track} size={TRACK_CARD_SIZE} />
         ))}
       </HorizontalSection>

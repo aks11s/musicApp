@@ -28,6 +28,13 @@ export const tracksApi = baseApi.injectEndpoints({
         return data.map(mapTrackDtoToTrack);
       },
     }),
+    getUndergroundTracks: build.query<Track[], number>({
+      query: limit => `/tracks/trending/underground?limit=${limit}`,
+      transformResponse: (response: unknown): Track[] => {
+        const {data} = trackListResponseSchema.parse(response);
+        return data.map(mapTrackDtoToTrack);
+      },
+    }),
     getTrack: build.query<Track, string>({
       query: trackId => `/tracks/${trackId}`,
       transformResponse: (response: unknown): Track => {
@@ -46,4 +53,9 @@ export const tracksApi = baseApi.injectEndpoints({
   overrideExisting: __DEV__,
 });
 
-export const {useGetTrendingTracksQuery, useGetTrackQuery, useSearchTracksQuery} = tracksApi;
+export const {
+  useGetTrendingTracksQuery,
+  useGetUndergroundTracksQuery,
+  useGetTrackQuery,
+  useSearchTracksQuery,
+} = tracksApi;

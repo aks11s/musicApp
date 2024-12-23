@@ -2,6 +2,8 @@ export const HOME_SEGMENTS = ['Suggested', 'Songs', 'Artists', 'Albums'] as cons
 
 export const TOP_ARTISTS_LIMIT = 7;
 
+export const UNDERGROUND_TRACKS_LIMIT = 10;
+
 export const SKELETON_COUNT = 4;
 
 export const RECENTLY_PLAYED_LIMIT = 20;
