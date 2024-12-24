@@ -7,7 +7,7 @@ import {useGetTopArtistsQuery} from '../../../services/api/users';
 import {TOP_ARTISTS_LIMIT, UNDERGROUND_TRACKS_LIMIT} from '../models/constants';
 import {getRecentlyPlayed} from '../models/recentlyPlayed.repository';
 import {selectMostPopularArtists} from '../models/selectors';
-import type {Artist, Track} from '../models/types';
+import type {Artist, Track} from '../../../domain/types';
 
 export type SuggestedViewModel = {
   recentlyPlayed: Track[];

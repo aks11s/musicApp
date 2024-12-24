@@ -2,12 +2,12 @@ import {z} from 'zod';
 import {
   mapPlaylistDtoToRemotePlaylist,
   mapTrackDtoToTrack,
-} from '../../features/home/models/mapper';
+} from '../../domain/mapper';
 import {
   playlistDtoSchema,
   trackDtoSchema,
-} from '../../features/home/models/schema';
-import type {RemotePlaylist, Track} from '../../features/home/models/types';
+} from '../../domain/schema';
+import type {RemotePlaylist, Track} from '../../domain/types';
 import {baseApi} from './baseApi';
 
 const playlistListResponseSchema = z.object({

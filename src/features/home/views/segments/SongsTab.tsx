@@ -5,7 +5,7 @@ import {EmptyState} from '../../../../shared/ui/EmptyState';
 import {TrackRow} from '../../../../shared/ui/TrackRow';
 import {formatDuration} from '../../../../shared/lib/formatDuration';
 import {SONG_SORT_FIELDS} from '../../models/constants';
-import type {Track} from '../../models/types';
+import type {Track} from '../../../../domain/types';
 import {useSongsViewModel} from '../../viewmodels/useSongsViewModel';
 import {TrackRowSkeletonList} from '../loaders/TrackRowSkeleton';
 

@@ -1,7 +1,7 @@
 import {z} from 'zod';
-import {mapTrackDtoToTrack, mapUserDtoToArtist} from '../../features/home/models/mapper';
-import {trackDtoSchema, userDtoSchema} from '../../features/home/models/schema';
-import type {Artist, Track} from '../../features/home/models/types';
+import {mapTrackDtoToTrack, mapUserDtoToArtist} from '../../domain/mapper';
+import {trackDtoSchema, userDtoSchema} from '../../domain/schema';
+import type {Artist, Track} from '../../domain/types';
 import {baseApi} from './baseApi';
 
 const singleUserResponseSchema = z.object({

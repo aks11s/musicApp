@@ -1,5 +1,6 @@
 import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE} from './constants';
-import type {Artist, SongSort, SongSortField, Track} from './types';
+import type {Artist, Track} from '../../../domain/types';
+import type {SongSort, SongSortField} from './types';
 
 export const selectMostPopularArtists = (artists: Artist[], limit: number): Artist[] =>
   [...artists].sort((a, b) => b.followerCount - a.followerCount).slice(0, limit);

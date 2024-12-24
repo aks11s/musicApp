@@ -1,7 +1,7 @@
 import {addRecentlyPlayed, getRecentlyPlayed} from './recentlyPlayed.repository';
 import {readRecentlyPlayed, writeRecentlyPlayed} from '../../../persistentStorage/recentlyPlayed.storage';
 import {RECENTLY_PLAYED_LIMIT} from './constants';
-import type {Track} from './types';
+import type {Track} from '../../../domain/types';
 
 jest.mock('../../../persistentStorage/recentlyPlayed.storage');
 

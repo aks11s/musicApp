@@ -6,7 +6,7 @@ import {
   nextSongsOffset,
   selectSortedSongs,
 } from './selectors';
-import type {Track} from './types';
+import type {Track} from '../../../domain/types';
 
 const track = (id: string, title: string, durationSeconds: number): Track => ({
   id,

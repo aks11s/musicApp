@@ -1,7 +1,7 @@
 import React from 'react';
 import {Image, Text, View} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
-import type {Artist} from '../../models/types';
+import type {Artist} from '../../../../domain/types';
 
 type ArtistAvatarProps = {artist: Artist};
 

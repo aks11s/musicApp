@@ -3,7 +3,7 @@ import {
   writeRecentlyPlayed,
 } from '../../../persistentStorage/recentlyPlayed.storage';
 import {RECENTLY_PLAYED_LIMIT} from './constants';
-import type {Track} from './types';
+import type {Track} from '../../../domain/types';
 
 export const getRecentlyPlayed = (): Track[] => readRecentlyPlayed<Track>();
 

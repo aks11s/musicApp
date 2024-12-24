@@ -1,7 +1,7 @@
 import React from 'react';
 import {Image, Text, View} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
-import type {Track} from '../../models/types';
+import type {Track} from '../../../../domain/types';
 
 type TrackCardProps = {
   track: Track;

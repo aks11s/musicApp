@@ -1,8 +1,8 @@
 import {z} from 'zod';
-import {mapTrackDtoToTrack} from '../../features/home/models/mapper';
+import {mapTrackDtoToTrack} from '../../domain/mapper';
 import {selectNewTracks} from '../../features/home/models/selectors';
-import {trackDtoSchema} from '../../features/home/models/schema';
-import type {Track} from '../../features/home/models/types';
+import {trackDtoSchema} from '../../domain/schema';
+import type {Track} from '../../domain/types';
 import {getAudiusHost} from './audiusHost';
 import {baseApi} from './baseApi';
 

@@ -7,7 +7,8 @@ import {
   nextSongsOffset,
   selectSortedSongs,
 } from '../models/selectors';
-import type {SongSort, SongSortField, Track} from '../models/types';
+import type {Track} from '../../../domain/types';
+import type {SongSort, SongSortField} from '../models/types';
 
 export type SongsViewModel = {
   songs: Track[];
