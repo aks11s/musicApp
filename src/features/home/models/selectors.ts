@@ -21,6 +21,12 @@ export const nextSongSort = (current: SongSort, field: SongSortField): SongSort 
     ? {field, isAscending: !current.isAscending}
     : {field, isAscending: true};
 
+
+export const selectNewTracks = (existing: Track[], incoming: Track[]): Track[] => {
+  const seen = new Set(existing.map(track => track.id));
+  return incoming.filter(track => !seen.has(track.id));
+};
+
 export const hasMoreSongs = (offset: number): boolean => offset < SONGS_MAX_OFFSET;
 
 export const nextSongsOffset = (offset: number): number => offset + SONGS_PAGE_SIZE;

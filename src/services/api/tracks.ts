@@ -1,5 +1,6 @@
 import {z} from 'zod';
 import {mapTrackDtoToTrack} from '../../features/home/models/mapper';
+import {selectNewTracks} from '../../features/home/models/selectors';
 import {trackDtoSchema} from '../../features/home/models/schema';
 import type {Track} from '../../features/home/models/types';
 import {getAudiusHost} from './audiusHost';
@@ -34,7 +35,7 @@ export const tracksApi = baseApi.injectEndpoints({
       query: ({offset, limit}) => `/tracks/trending?offset=${offset}&limit=${limit}`,
       serializeQueryArgs: ({endpointName}) => endpointName,
       merge: (existing, incoming) => {
-        existing.push(...incoming);
+        existing.push(...selectNewTracks(existing, incoming));
       },
       forceRefetch: ({currentArg, previousArg}) => currentArg?.offset !== previousArg?.offset,
       transformResponse: (response: unknown): Track[] => {

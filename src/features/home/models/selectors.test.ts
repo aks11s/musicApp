@@ -1,5 +1,11 @@
 import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE} from './constants';
-import {hasMoreSongs, nextSongSort, nextSongsOffset, selectSortedSongs} from './selectors';
+import {
+  selectNewTracks,
+  hasMoreSongs,
+  nextSongSort,
+  nextSongsOffset,
+  selectSortedSongs,
+} from './selectors';
 import type {Track} from './types';
 
 const track = (id: string, title: string, durationSeconds: number): Track => ({
@@ -101,5 +107,28 @@ describe('nextSongsOffset', () => {
   it('advances by one page', () => {
     expect(nextSongsOffset(0)).toBe(SONGS_PAGE_SIZE);
     expect(nextSongsOffset(150)).toBe(200);
+  });
+});
+
+describe('selectNewTracks', () => {
+  const a = track('a', 'A', 10);
+  const b = track('b', 'B', 20);
+  const c = track('c', 'C', 30);
+
+  it('returns tracks that are not there yet', () => {
+    expect(selectNewTracks([a], [b, c]).map(t => t.id)).toEqual(['b', 'c']);
+  });
+
+  // RTK can replay merge for the same page
+  it('drops incoming tracks already present', () => {
+    expect(selectNewTracks([a, b], [b, c]).map(t => t.id)).toEqual(['c']);
+  });
+
+  it('returns nothing when the same page lands twice', () => {
+    expect(selectNewTracks([a, b], [a, b])).toEqual([]);
+  });
+
+  it('keeps incoming order', () => {
+    expect(selectNewTracks([a], [c, b]).map(t => t.id)).toEqual(['c', 'b']);
   });
 });
