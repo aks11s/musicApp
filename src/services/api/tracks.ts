@@ -1,6 +1,5 @@
 import {z} from 'zod';
 import {mapTrackDtoToTrack} from '../../domain/mapper';
-import {selectNewTracks} from '../../features/home/models/selectors';
 import {trackDtoSchema} from '../../domain/schema';
 import type {Track} from '../../domain/types';
 import {getAudiusHost} from './audiusHost';
@@ -29,15 +28,10 @@ export const tracksApi = baseApi.injectEndpoints({
         return data.map(mapTrackDtoToTrack);
       },
     }),
-    // paginated twin of getTrendingTracks: pages accumulate into one cache entry,
-    // so the Songs list keeps what it already showed instead of replacing it
+    // one page, one cache entry — accumulating pages is a Songs rule, not the
+    // endpoint's busines
     getTrendingTracksPage: build.query<Track[], {offset: number; limit: number}>({
       query: ({offset, limit}) => `/tracks/trending?offset=${offset}&limit=${limit}`,
-      serializeQueryArgs: ({endpointName}) => endpointName,
-      merge: (existing, incoming) => {
-        existing.push(...selectNewTracks(existing, incoming));
-      },
-      forceRefetch: ({currentArg, previousArg}) => currentArg?.offset !== previousArg?.offset,
       transformResponse: (response: unknown): Track[] => {
         const {data} = trackListResponseSchema.parse(response);
         return data.map(mapTrackDtoToTrack);

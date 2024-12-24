@@ -1,9 +1,9 @@
 import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE} from './constants';
 import {
-  selectNewTracks,
   hasMoreSongs,
   nextSongSort,
   nextSongsOffset,
+  putPageAt,
   selectSortedSongs,
 } from './selectors';
 import type {Track} from '../../../domain/types';
@@ -110,25 +110,36 @@ describe('nextSongsOffset', () => {
   });
 });
 
-describe('selectNewTracks', () => {
-  const a = track('a', 'A', 10);
-  const b = track('b', 'B', 20);
-  const c = track('c', 'C', 30);
-
-  it('returns tracks that are not there yet', () => {
-    expect(selectNewTracks([a], [b, c]).map(t => t.id)).toEqual(['b', 'c']);
+describe('putPageAt', () => {
+  it('fills an empty slot', () => {
+    expect(putPageAt<string[]>([], 0, ['a'])).toEqual([['a']]);
   });
 
-  // RTK can replay merge for the same page
-  it('drops incoming tracks already present', () => {
-    expect(selectNewTracks([a, b], [b, c]).map(t => t.id)).toEqual(['c']);
+  it('leaves gaps for pages not loaded yet', () => {
+    const result = putPageAt<string[] | undefined>([], 2, ['c']);
+
+    expect(result).toHaveLength(3);
+    expect(result[2]).toEqual(['c']);
   });
 
-  it('returns nothing when the same page lands twice', () => {
-    expect(selectNewTracks([a, b], [a, b])).toEqual([]);
+  it('replaces a slot holding a different page', () => {
+    expect(putPageAt([['a']], 0, ['b'])).toEqual([['b']]);
   });
 
-  it('keeps incoming order', () => {
-    expect(selectNewTracks([a], [c, b]).map(t => t.id)).toEqual(['c', 'b']);
+  // the point of the helper: no new array means no re-render
+  it('returns the same array when the slot already holds that page', () => {
+    const page = ['a'];
+    const pages = [page];
+
+    expect(putPageAt(pages, 0, page)).toBe(pages);
+  });
+
+  it('does not mutate the input', () => {
+    const pages = [['a']];
+    const original = [...pages];
+
+    putPageAt(pages, 1, ['b']);
+
+    expect(pages).toEqual(original);
   });
 });

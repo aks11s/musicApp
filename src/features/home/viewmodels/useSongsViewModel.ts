@@ -1,13 +1,15 @@
-import {useCallback, useMemo, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
+import type {Track} from '../../../domain/types';
 import {useGetTrendingTracksPageQuery} from '../../../services/api/tracks';
+import {uniqueById} from '../../../shared/lib/collections';
 import {SONGS_PAGE_SIZE} from '../models/constants';
 import {
   hasMoreSongs,
   nextSongSort,
   nextSongsOffset,
+  putPageAt,
   selectSortedSongs,
 } from '../models/selectors';
-import type {Track} from '../../../domain/types';
 import type {SongSort, SongSortField} from '../models/types';
 
 export type SongsViewModel = {
@@ -24,6 +26,7 @@ export type SongsViewModel = {
 
 export const useSongsViewModel = (): SongsViewModel => {
   const [offset, setOffset] = useState(0);
+  const [pages, setPages] = useState<Track[][]>([]);
   const [sort, setSort] = useState<SongSort>({field: 'title', isAscending: true});
 
   const {data, isLoading, isError, isFetching} = useGetTrendingTracksPageQuery({
@@ -31,13 +34,20 @@ export const useSongsViewModel = (): SongsViewModel => {
     limit: SONGS_PAGE_SIZE,
   });
 
-  const loaded = useMemo(() => data ?? [], [data]);
+  const pageIndex = offset / SONGS_PAGE_SIZE;
+
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+    setPages(current => putPageAt(current, pageIndex, data));
+  }, [data, pageIndex]);
+
+  const loaded = useMemo(() => uniqueById(pages.flat()), [pages]);
   const songs = useMemo(() => selectSortedSongs(loaded, sort), [loaded, sort]);
 
   const hasMore = hasMoreSongs(offset);
-  // isFetching stays true while a new page lands, but the merged data is already
-  // there — that difference is what separates the footer spinner from the first load
-  const isLoadingMore = isFetching && !isLoading;
+  const isLoadingMore = isFetching && loaded.length > 0;
 
   const loadMore = useCallback(() => {
     if (isFetching || !hasMore) {
@@ -55,7 +65,7 @@ export const useSongsViewModel = (): SongsViewModel => {
     songCount: loaded.length,
     sort,
     toggleSortField,
-    isLoading,
+    isLoading: isLoading && loaded.length === 0,
     isError,
     isLoadingMore,
     hasMore,
