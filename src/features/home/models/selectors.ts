@@ -1,4 +1,5 @@
-import type {Artist, SongSort, Track} from './types';
+import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE} from './constants';
+import type {Artist, SongSort, SongSortField, Track} from './types';
 
 export const selectMostPopularArtists = (artists: Artist[], limit: number): Artist[] =>
   [...artists].sort((a, b) => b.followerCount - a.followerCount).slice(0, limit);
@@ -13,5 +14,15 @@ export const selectSortedSongs = (tracks: Track[], sort: SongSort): Track[] =>
     const result = compareByField(a, b, sort.field);
     return sort.isAscending ? result : -result;
   });
+
+// tapping the active field flips direction, a new field starts ascending
+export const nextSongSort = (current: SongSort, field: SongSortField): SongSort =>
+  current.field === field
+    ? {field, isAscending: !current.isAscending}
+    : {field, isAscending: true};
+
+export const hasMoreSongs = (offset: number): boolean => offset < SONGS_MAX_OFFSET;
+
+export const nextSongsOffset = (offset: number): number => offset + SONGS_PAGE_SIZE;
 
 

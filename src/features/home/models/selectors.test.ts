@@ -1,4 +1,5 @@
-import {selectSortedSongs} from './selectors';
+import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE} from './constants';
+import {hasMoreSongs, nextSongSort, nextSongsOffset, selectSortedSongs} from './selectors';
 import type {Track} from './types';
 
 const track = (id: string, title: string, durationSeconds: number): Track => ({
@@ -62,5 +63,43 @@ describe('selectSortedSongs', () => {
     selectSortedSongs(tracks, {field: 'title', isAscending: true});
 
     expect(tracks).toEqual(original);
+  });
+});
+
+describe('nextSongSort', () => {
+  it('flips direction when the active field is tapped again', () => {
+    const current = {field: 'title', isAscending: true} as const;
+
+    expect(nextSongSort(current, 'title')).toEqual({field: 'title', isAscending: false});
+  });
+
+  it('flips back on a third tap', () => {
+    const current = {field: 'title', isAscending: false} as const;
+
+    expect(nextSongSort(current, 'title')).toEqual({field: 'title', isAscending: true});
+  });
+
+  it('starts a newly picked field ascending', () => {
+    const current = {field: 'title', isAscending: false} as const;
+
+    expect(nextSongSort(current, 'duration')).toEqual({field: 'duration', isAscending: true});
+  });
+});
+
+describe('hasMoreSongs', () => {
+  it('allows loading while under the Audius offset ceiling', () => {
+    expect(hasMoreSongs(0)).toBe(true);
+    expect(hasMoreSongs(SONGS_MAX_OFFSET - SONGS_PAGE_SIZE)).toBe(true);
+  });
+
+  it('stops at the ceiling, since Audius 400s beyond it', () => {
+    expect(hasMoreSongs(SONGS_MAX_OFFSET)).toBe(false);
+  });
+});
+
+describe('nextSongsOffset', () => {
+  it('advances by one page', () => {
+    expect(nextSongsOffset(0)).toBe(SONGS_PAGE_SIZE);
+    expect(nextSongsOffset(150)).toBe(200);
   });
 });
