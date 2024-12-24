@@ -28,6 +28,20 @@ export const tracksApi = baseApi.injectEndpoints({
         return data.map(mapTrackDtoToTrack);
       },
     }),
+    // paginated twin of getTrendingTracks: pages accumulate into one cache entry,
+    // so the Songs list keeps what it already showed instead of replacing it
+    getTrendingTracksPage: build.query<Track[], {offset: number; limit: number}>({
+      query: ({offset, limit}) => `/tracks/trending?offset=${offset}&limit=${limit}`,
+      serializeQueryArgs: ({endpointName}) => endpointName,
+      merge: (existing, incoming) => {
+        existing.push(...incoming);
+      },
+      forceRefetch: ({currentArg, previousArg}) => currentArg?.offset !== previousArg?.offset,
+      transformResponse: (response: unknown): Track[] => {
+        const {data} = trackListResponseSchema.parse(response);
+        return data.map(mapTrackDtoToTrack);
+      },
+    }),
     getUndergroundTracks: build.query<Track[], number>({
       query: limit => `/tracks/trending/underground?limit=${limit}`,
       transformResponse: (response: unknown): Track[] => {
@@ -55,6 +69,7 @@ export const tracksApi = baseApi.injectEndpoints({
 
 export const {
   useGetTrendingTracksQuery,
+  useGetTrendingTracksPageQuery,
   useGetUndergroundTracksQuery,
   useGetTrackQuery,
   useSearchTracksQuery,
