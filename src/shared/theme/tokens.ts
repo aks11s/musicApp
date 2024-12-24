@@ -40,6 +40,8 @@ export const typography = {
     caption: 11.5,
     small: 12.5,
     body: 13,
+    label: 13.5,
+    row: 14,
     subtitle: 15,
     title: 16,
     heading: 21,
