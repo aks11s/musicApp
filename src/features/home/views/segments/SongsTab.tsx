@@ -1,18 +1,34 @@
 import React, {useCallback} from 'react';
-import {ActivityIndicator, FlatList, Text, TouchableOpacity, View} from 'react-native';
+import {ActivityIndicator, FlatList, View} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
+import type {Track} from '../../../../domain/types';
+import {formatDuration} from '../../../../shared/lib/formatDuration';
 import {EmptyState} from '../../../../shared/ui/EmptyState';
 import {TrackRow} from '../../../../shared/ui/TrackRow';
-import {formatDuration} from '../../../../shared/lib/formatDuration';
-import {SONG_SORT_FIELDS} from '../../models/constants';
-import type {Track} from '../../../../domain/types';
+import {TRACK_ROW_HEIGHT} from '../../models/constants';
 import {useSongsViewModel} from '../../viewmodels/useSongsViewModel';
+import {SongsHeader} from '../components/SongsHeader';
 import {TrackRowSkeletonList} from '../loaders/TrackRowSkeleton';
 
-const SORT_LABELS = {title: 'Title', duration: 'Duration'} as const;
+const keyExtractor = (track: Track): string => track.id;
+
+const getItemLayout = (_: ArrayLike<Track> | null | undefined, index: number) => ({
+  length: TRACK_ROW_HEIGHT,
+  offset: TRACK_ROW_HEIGHT * index,
+  index,
+});
+
+const renderItem = ({item}: {item: Track}): React.JSX.Element => (
+  <TrackRow
+    title={item.title}
+    subtitle={`${item.artist} · ${formatDuration(item.durationSeconds)}`}
+    artworkUrl={item.artworkUrl}
+  />
+);
 
 export const SongsTab = (): React.JSX.Element => {
   const {styles, theme} = useStyles(stylesheet);
+  
   const {
     songs,
     songCount,
@@ -24,16 +40,19 @@ export const SongsTab = (): React.JSX.Element => {
     loadMore,
   } = useSongsViewModel();
 
-  // stable identity, otherwise TrackRow's memo never holds
-  const renderItem = useCallback(
-    ({item}: {item: Track}) => (
-      <TrackRow
-        title={item.title}
-        subtitle={`${item.artist} · ${formatDuration(item.durationSeconds)}`}
-        artworkUrl={item.artworkUrl}
-      />
+  const header = useCallback(
+    () => (
+      <SongsHeader songCount={songCount} sort={sort} onSortFieldPress={toggleSortField} />
     ),
-    [],
+    [songCount, sort, toggleSortField],
+  );
+
+  const footer = useCallback(
+    () =>
+      isLoadingMore ? (
+        <ActivityIndicator style={styles.footer} color={theme.colors.accent} />
+      ) : null,
+    [isLoadingMore, styles.footer, theme.colors.accent],
   );
 
   if (isLoading) {
@@ -51,36 +70,19 @@ export const SongsTab = (): React.JSX.Element => {
   return (
     <FlatList
       data={songs}
-      keyExtractor={track => track.id}
+      keyExtractor={keyExtractor}
       renderItem={renderItem}
+      getItemLayout={getItemLayout}
       contentContainerStyle={styles.list}
       showsVerticalScrollIndicator={false}
       onEndReached={loadMore}
       onEndReachedThreshold={0.4}
-      ListHeaderComponent={
-        <View style={styles.header}>
-          <Text style={styles.count}>{songCount} songs</Text>
-
-          <View style={styles.sortGroup}>
-            {SONG_SORT_FIELDS.map(field => {
-              const isActive = sort.field === field;
-              return (
-                <TouchableOpacity key={field} onPress={() => toggleSortField(field)}>
-                  <Text style={[styles.sortLabel, isActive && styles.sortLabelActive]}>
-                    {SORT_LABELS[field]}
-                    {isActive ? (sort.isAscending ? ' ↑' : ' ↓') : ''}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
-      }
-      ListFooterComponent={
-        isLoadingMore ? (
-          <ActivityIndicator style={styles.footer} color={theme.colors.accent} />
-        ) : null
-      }
+      initialNumToRender={12}
+      maxToRenderPerBatch={10}
+      windowSize={9}
+      removeClippedSubviews
+      ListHeaderComponent={header}
+      ListFooterComponent={footer}
     />
   );
 };
@@ -93,31 +95,6 @@ const stylesheet = createStyleSheet(theme => ({
   loadingContainer: {
     paddingHorizontal: theme.spacing.md,
     paddingTop: theme.spacing.xl,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: theme.spacing.md,
-    paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.sm,
-  },
-  count: {
-    fontFamily: theme.typography.families.semibold,
-    fontSize: theme.typography.sizes.label,
-    color: theme.colors.text,
-  },
-  sortGroup: {
-    flexDirection: 'row',
-    gap: theme.spacing.md,
-  },
-  sortLabel: {
-    fontFamily: theme.typography.families.semibold,
-    fontSize: theme.typography.sizes.body,
-    color: theme.colors.textMuted,
-  },
-  sortLabelActive: {
-    color: theme.colors.accent,
   },
   footer: {
     paddingVertical: theme.spacing.lg,

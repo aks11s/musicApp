@@ -17,6 +17,8 @@ export const SONGS_SKELETON_COUNT = 8;
 // feature's constants, so the skeleton repeats it to keep the same geometry
 export const TRACK_ROW_ARTWORK_SIZE = 52;
 
+export const TRACK_ROW_HEIGHT = 70;
+
 export const RECENTLY_PLAYED_LIMIT = 20;
 export const TRACK_CARD_SIZE = 128;
 export const RECENTLY_PLAYED_CARD_SIZE = 112;

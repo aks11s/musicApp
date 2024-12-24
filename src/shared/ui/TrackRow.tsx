@@ -3,6 +3,7 @@ import {Image, Text, TouchableOpacity, View} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
+const ROW_HEIGHT = 70;
 const ARTWORK_SIZE = 52;
 const PLAY_SIZE = 34;
 const PLAY_ICON_SIZE = 14;
@@ -62,9 +63,9 @@ const stylesheet = createStyleSheet(theme => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    height: ROW_HEIGHT,
     gap: theme.spacing.md + 1,
     paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.sm + 1,
   },
   artwork: {
     width: ARTWORK_SIZE,

@@ -2,7 +2,11 @@ import React from 'react';
 import {View} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import {Skeleton} from '../../../../shared/ui/Skeleton';
-import {SONGS_SKELETON_COUNT, TRACK_ROW_ARTWORK_SIZE} from '../../models/constants';
+import {
+  SONGS_SKELETON_COUNT,
+  TRACK_ROW_ARTWORK_SIZE,
+  TRACK_ROW_HEIGHT,
+} from '../../models/constants';
 
 const TrackRowSkeleton = (): React.JSX.Element => {
   const {styles, theme} = useStyles(stylesheet);
@@ -34,9 +38,9 @@ const stylesheet = createStyleSheet(theme => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    height: TRACK_ROW_HEIGHT,
     gap: theme.spacing.md + 1,
     paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.sm + 1,
   },
   texts: {
     flex: 1,
