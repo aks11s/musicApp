@@ -1,7 +1,7 @@
 import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
 import type {BaseQueryFn, FetchArgs, FetchBaseQueryError} from '@reduxjs/toolkit/query/react';
 import {getAudiusHost} from './audiusHost';
- 
+
 export type AudiusQueryOptions = {
   full?: boolean;
 };

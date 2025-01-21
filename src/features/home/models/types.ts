@@ -8,3 +8,10 @@ export type SongSort = {
   field: SongSortField;
   isAscending: boolean;
 };
+
+export type SongsLoadState = {
+  hasScrolled: boolean;
+  isFetching: boolean;
+  offset: number;
+  requestedOffset: number;
+};

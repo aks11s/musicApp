@@ -1,10 +1,10 @@
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import type {Track} from '../../../domain/types';
 import {useGetTrendingTracksPageQuery} from '../../../services/api/tracks';
 import {uniqueById} from '../../../shared/lib/collections';
 import {SONGS_PAGE_SIZE} from '../models/constants';
 import {
-  hasMoreSongs,
+  canLoadMoreSongs,
   nextSongSort,
   nextSongsOffset,
   putPageAt,
@@ -20,8 +20,8 @@ export type SongsViewModel = {
   isLoading: boolean;
   isError: boolean;
   isLoadingMore: boolean;
-  hasMore: boolean;
   loadMore: () => void;
+  allowLoadMore: () => void;
 };
 
 export const useSongsViewModel = (): SongsViewModel => {
@@ -46,15 +46,29 @@ export const useSongsViewModel = (): SongsViewModel => {
   const loaded = useMemo(() => uniqueById(pages.flat()), [pages]);
   const songs = useMemo(() => selectSortedSongs(loaded, sort), [loaded, sort]);
 
-  const hasMore = hasMoreSongs(offset);
   const isLoadingMore = isFetching && loaded.length > 0;
 
+  const hasScrolled = useRef(false);
+  const requestedOffset = useRef(0);
+
+  const allowLoadMore = useCallback(() => {
+    hasScrolled.current = true;
+  }, []);
+
   const loadMore = useCallback(() => {
-    if (isFetching || !hasMore) {
+    const allowed = canLoadMoreSongs({
+      hasScrolled: hasScrolled.current,
+      isFetching: isFetching,
+      offset: offset,
+      requestedOffset: requestedOffset.current,
+    });
+    if (!allowed) {
       return;
     }
-    setOffset(nextSongsOffset);
-  }, [isFetching, hasMore]);
+    const next = nextSongsOffset(offset);
+    requestedOffset.current = next;
+    setOffset(next);
+  }, [isFetching, offset]);
 
   const toggleSortField = useCallback((field: SongSortField) => {
     setSort(current => nextSongSort(current, field));
@@ -68,7 +82,7 @@ export const useSongsViewModel = (): SongsViewModel => {
     isLoading: isLoading && loaded.length === 0,
     isError,
     isLoadingMore,
-    hasMore,
     loadMore,
+    allowLoadMore,
   };
 };

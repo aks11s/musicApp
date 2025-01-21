@@ -1,5 +1,6 @@
 import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE} from './constants';
 import {
+  canLoadMoreSongs,
   hasMoreSongs,
   nextSongSort,
   nextSongsOffset,
@@ -141,5 +142,37 @@ describe('putPageAt', () => {
     putPageAt(pages, 1, ['b']);
 
     expect(pages).toEqual(original);
+  });
+});
+
+describe('canLoadMoreSongs', () => {
+  const ready = {hasScrolled: true, isFetching: false, offset: 0, requestedOffset: 0};
+
+  it('allows loading once the user has scrolled', () => {
+    expect(canLoadMoreSongs(ready)).toBe(true);
+  });
+
+  // FlatList reports "end reached" on mount, before any scrolling
+  it('blocks the very first load until the user scrolls', () => {
+    expect(canLoadMoreSongs({...ready, hasScrolled: false})).toBe(false);
+  });
+
+  it('blocks while a page is still in flight', () => {
+    expect(canLoadMoreSongs({...ready, isFetching: true})).toBe(false);
+  });
+
+  // onEndReached fires repeatedly; without this a second call skips a page
+  it('blocks when a further offset was already requested', () => {
+    expect(canLoadMoreSongs({...ready, offset: 0, requestedOffset: 50})).toBe(false);
+  });
+
+  it('allows the next page once the requested offset caught up', () => {
+    expect(canLoadMoreSongs({...ready, offset: 50, requestedOffset: 50})).toBe(true);
+  });
+
+  it('blocks at the Audius offset ceiling', () => {
+    const atCeiling = {...ready, offset: SONGS_MAX_OFFSET, requestedOffset: SONGS_MAX_OFFSET};
+
+    expect(canLoadMoreSongs(atCeiling)).toBe(false);
   });
 });

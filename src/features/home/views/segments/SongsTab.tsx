@@ -28,7 +28,7 @@ const renderItem = ({item}: {item: Track}): React.JSX.Element => (
 
 export const SongsTab = (): React.JSX.Element => {
   const {styles, theme} = useStyles(stylesheet);
-  
+
   const {
     songs,
     songCount,
@@ -38,6 +38,7 @@ export const SongsTab = (): React.JSX.Element => {
     isError,
     isLoadingMore,
     loadMore,
+    allowLoadMore,
   } = useSongsViewModel();
 
   const header = useCallback(
@@ -76,10 +77,12 @@ export const SongsTab = (): React.JSX.Element => {
       contentContainerStyle={styles.list}
       showsVerticalScrollIndicator={false}
       onEndReached={loadMore}
-      onEndReachedThreshold={0.4}
+      onScrollBeginDrag={allowLoadMore}
+      onEndReachedThreshold={0.1}
       initialNumToRender={12}
-      maxToRenderPerBatch={10}
-      windowSize={9}
+      maxToRenderPerBatch={6}
+      updateCellsBatchingPeriod={60}
+      windowSize={7}
       removeClippedSubviews
       ListHeaderComponent={header}
       ListFooterComponent={footer}

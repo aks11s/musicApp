@@ -19,18 +19,24 @@ type TrackRowProps = {
 };
 
 export const TrackRow = React.memo(({
-  title, 
-  subtitle, 
-  artworkUrl, 
-  onPress, 
-  onPlay, 
-  onMenu
+  title,
+  subtitle,
+  artworkUrl,
+  onPress,
+  onPlay,
+  onMenu,
 }: TrackRowProps): React.JSX.Element => {
     const {styles, theme} = useStyles(stylesheet);
+    // a fresh uri object on every render remounts the image
+    const source = React.useMemo(() => ({uri: artworkUrl}), [artworkUrl]);
+
+    const Row = onPress ? TouchableOpacity : View;
+    const Play = onPlay ? TouchableOpacity : View;
+    const Menu = onMenu ? TouchableOpacity : View;
 
     return (
-      <TouchableOpacity style={styles.row} onPress={onPress} disabled={!onPress}>
-        <Image source={{uri: artworkUrl}} style={styles.artwork} />
+      <Row style={styles.row} onPress={onPress}>
+        <Image source={source} style={styles.artwork} />
 
         <View style={styles.texts}>
           <Text style={styles.title} numberOfLines={1}>
@@ -41,18 +47,18 @@ export const TrackRow = React.memo(({
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.play} onPress={onPlay} disabled={!onPlay}>
+        <Play style={styles.play} onPress={onPlay}>
           <Ionicons name="play" size={PLAY_ICON_SIZE} color={theme.colors.background} />
-        </TouchableOpacity>
+        </Play>
 
-        <TouchableOpacity style={styles.menu} onPress={onMenu} disabled={!onMenu}>
+        <Menu style={styles.menu} onPress={onMenu}>
           <Ionicons
             name="ellipsis-vertical"
             size={MENU_ICON_SIZE}
             color={theme.colors.textMuted}
           />
-        </TouchableOpacity>
-      </TouchableOpacity>
+        </Menu>
+      </Row>
     );
   },
 );
