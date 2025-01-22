@@ -8,10 +8,19 @@ export const selectMostPopularArtists = (artists: Artist[], limit: number): Arti
 // localeCompare which is 17 x slower over a few hundred tracks
 const titleCollator = new Intl.Collator(undefined, {sensitivity: 'base', numeric: true});
 
-const compareByField = (a: Track, b: Track, field: SongSort['field']): number =>
-  field === 'title'
-    ? titleCollator.compare(a.title, b.title)
-    : a.durationSeconds - b.durationSeconds;
+// ISO dates compare correctly as plain text, so no Date is parsed per comparison
+const compareByField = (a: Track, b: Track, field: SongSortField): number => {
+  switch (field) {
+    case 'title':
+      return titleCollator.compare(a.title, b.title);
+    case 'artist':
+      return titleCollator.compare(a.artist, b.artist);
+    case 'duration':
+      return a.durationSeconds - b.durationSeconds;
+    case 'year':
+      return a.releaseDate.localeCompare(b.releaseDate);
+  }
+};
 
 export const selectSortedSongs = (tracks: Track[], sort: SongSort): Track[] =>
   [...tracks].sort((a, b) => {
@@ -19,11 +28,13 @@ export const selectSortedSongs = (tracks: Track[], sort: SongSort): Track[] =>
     return sort.isAscending ? result : -result;
   });
 
-// tapping the active field flips direction, a new field starts ascending
-export const nextSongSort = (current: SongSort, field: SongSortField): SongSort =>
-  current.field === field
-    ? {field, isAscending: !current.isAscending}
-    : {field, isAscending: true};
+export const withSongSortField = (current: SongSort, field: SongSortField): SongSort =>
+  current.field === field ? current : {field, isAscending: true};
+
+export const withFlippedSongSort = (current: SongSort): SongSort => ({
+  ...current,
+  isAscending: !current.isAscending,
+});
 
 
 export const hasMoreSongs = (offset: number): boolean => offset < SONGS_MAX_OFFSET;
@@ -32,7 +43,7 @@ export const nextSongsOffset = (offset: number): number => offset + SONGS_PAGE_S
 
 export const canLoadMoreSongs = ({ hasScrolled, isFetching, offset, requestedOffset }: SongsLoadState): boolean => {
   return hasScrolled && !isFetching && hasMoreSongs(offset) && requestedOffset === offset;
-}
+};
 
 export const putPageAt = <T>(pages: T[], index: number, page: T): T[] => {
   if (pages[index] === page) {

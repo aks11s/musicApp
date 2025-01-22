@@ -6,6 +6,13 @@ export const UNDERGROUND_TRACKS_LIMIT = 10;
 
 export const SONG_SORT_FIELDS = ['title', 'artist', 'duration', 'year'] as const;
 
+export const SONG_SORT_LABELS = {
+  title: 'Title',
+  artist: 'Artist',
+  duration: 'Duration',
+  year: 'Year',
+} as const;
+
 
 export const SONGS_PAGE_SIZE = 50;
 export const SONGS_MAX_OFFSET = 200;

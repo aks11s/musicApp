@@ -5,7 +5,8 @@ import {uniqueById} from '../../../shared/lib/collections';
 import {SONGS_PAGE_SIZE} from '../models/constants';
 import {
   canLoadMoreSongs,
-  nextSongSort,
+  withFlippedSongSort,
+  withSongSortField,
   nextSongsOffset,
   putPageAt,
   selectSortedSongs,
@@ -16,7 +17,8 @@ export type SongsViewModel = {
   songs: Track[];
   songCount: number;
   sort: SongSort;
-  toggleSortField: (field: SongSortField) => void;
+  setSortField: (field: SongSortField) => void;
+  toggleSortDirection: () => void;
   isLoading: boolean;
   isError: boolean;
   isLoadingMore: boolean;
@@ -70,15 +72,20 @@ export const useSongsViewModel = (): SongsViewModel => {
     setOffset(next);
   }, [isFetching, offset]);
 
-  const toggleSortField = useCallback((field: SongSortField) => {
-    setSort(current => nextSongSort(current, field));
+  const setSortField = useCallback((field: SongSortField) => {
+    setSort(current => withSongSortField(current, field));
+  }, []);
+
+  const toggleSortDirection = useCallback(() => {
+    setSort(withFlippedSongSort);
   }, []);
 
   return {
     songs,
     songCount: loaded.length,
     sort,
-    toggleSortField,
+    setSortField,
+    toggleSortDirection,
     isLoading: isLoading && loaded.length === 0,
     isError,
     isLoadingMore,

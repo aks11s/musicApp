@@ -1,10 +1,8 @@
 import React from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
-import {SONG_SORT_FIELDS} from '../../models/constants';
+import {SONG_SORT_FIELDS, SONG_SORT_LABELS} from '../../models/constants';
 import type {SongSort, SongSortField} from '../../models/types';
-
-const SORT_LABELS = {title: 'Title', duration: 'Duration'} as const;
 
 type SongsHeaderProps = {
   songCount: number;
@@ -57,7 +55,7 @@ const SortButton = React.memo(
     return (
       <TouchableOpacity onPress={handlePress}>
         <Text style={[styles.sortLabel, isActive && styles.sortLabelActive]}>
-          {SORT_LABELS[field]}
+          {SONG_SORT_LABELS[field]}
           {isActive ? (isAscending ? ' ↑' : ' ↓') : ''}
         </Text>
       </TouchableOpacity>

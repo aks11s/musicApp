@@ -2,20 +2,27 @@ import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE} from './constants';
 import {
   canLoadMoreSongs,
   hasMoreSongs,
-  nextSongSort,
+  withFlippedSongSort,
+  withSongSortField,
   nextSongsOffset,
   putPageAt,
   selectSortedSongs,
 } from './selectors';
 import type {Track} from '../../../domain/types';
 
-const track = (id: string, title: string, durationSeconds: number): Track => ({
+const track = (
+  id: string,
+  title: string,
+  durationSeconds: number,
+  overrides: Partial<Track> = {},
+): Track => ({
   id,
   title,
   artist: 'Someone',
   artworkUrl: '',
   durationSeconds,
   releaseDate: '2024-01-01T00:00:00Z',
+  ...overrides,
 });
 
 const tracks = [
@@ -65,6 +72,50 @@ describe('selectSortedSongs', () => {
     expect(sorted.map(t => t.durationSeconds)).toEqual([400, 230, 118]);
   });
 
+  it('sorts by artist ascending', () => {
+    const byArtist = [
+      track('1', 'a', 10, {artist: 'Zola'}),
+      track('2', 'b', 10, {artist: 'aria Nova'}),
+      track('3', 'c', 10, {artist: 'Mono'}),
+    ];
+
+    const sorted = selectSortedSongs(byArtist, {field: 'artist', isAscending: true});
+
+    expect(sorted.map(t => t.artist)).toEqual(['aria Nova', 'Mono', 'Zola']);
+  });
+
+  it('sorts by year oldest first when ascending', () => {
+    const byYear = [
+      track('1', 'a', 10, {releaseDate: '2026-01-05T00:00:00Z'}),
+      track('2', 'b', 10, {releaseDate: '2021-11-30T00:00:00Z'}),
+      track('3', 'c', 10, {releaseDate: '2024-06-02T00:00:00Z'}),
+    ];
+
+    const sorted = selectSortedSongs(byYear, {field: 'year', isAscending: true});
+
+    expect(sorted.map(t => t.releaseDate.slice(0, 4))).toEqual(['2021', '2024', '2026']);
+  });
+
+  it('sorts by year newest first when descending', () => {
+    const byYear = [
+      track('1', 'a', 10, {releaseDate: '2021-11-30T00:00:00Z'}),
+      track('2', 'b', 10, {releaseDate: '2026-01-05T00:00:00Z'}),
+    ];
+
+    const sorted = selectSortedSongs(byYear, {field: 'year', isAscending: false});
+
+    expect(sorted.map(t => t.releaseDate.slice(0, 4))).toEqual(['2026', '2021']);
+  });
+
+  // the mapper leaves an empty string when the API omits the date
+  it('does not crash on tracks without a release date', () => {
+    const mixed = [track('1', 'a', 10, {releaseDate: ''}), track('2', 'b', 10)];
+
+    expect(() =>
+      selectSortedSongs(mixed, {field: 'year', isAscending: true}),
+    ).not.toThrow();
+  });
+
   it('does not mutate the input', () => {
     const original = [...tracks];
 
@@ -74,23 +125,34 @@ describe('selectSortedSongs', () => {
   });
 });
 
-describe('nextSongSort', () => {
-  it('flips direction when the active field is tapped again', () => {
-    const current = {field: 'title', isAscending: true} as const;
-
-    expect(nextSongSort(current, 'title')).toEqual({field: 'title', isAscending: false});
-  });
-
-  it('flips back on a third tap', () => {
-    const current = {field: 'title', isAscending: false} as const;
-
-    expect(nextSongSort(current, 'title')).toEqual({field: 'title', isAscending: true});
-  });
-
+describe('withSongSortField', () => {
   it('starts a newly picked field ascending', () => {
     const current = {field: 'title', isAscending: false} as const;
 
-    expect(nextSongSort(current, 'duration')).toEqual({field: 'duration', isAscending: true});
+    expect(withSongSortField(current, 'artist')).toEqual({field: 'artist', isAscending: true});
+  });
+
+  // picking the field that is already active is not a direction change
+  it('keeps the current sort when the same field is picked', () => {
+    const current = {field: 'title', isAscending: false} as const;
+
+    expect(withSongSortField(current, 'title')).toBe(current);
+  });
+});
+
+describe('withFlippedSongSort', () => {
+  it('flips ascending to descending', () => {
+    expect(withFlippedSongSort({field: 'year', isAscending: true})).toEqual({
+      field: 'year',
+      isAscending: false,
+    });
+  });
+
+  it('flips back', () => {
+    expect(withFlippedSongSort({field: 'year', isAscending: false})).toEqual({
+      field: 'year',
+      isAscending: true,
+    });
   });
 });
 

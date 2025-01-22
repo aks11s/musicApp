@@ -33,7 +33,7 @@ export const SongsTab = (): React.JSX.Element => {
     songs,
     songCount,
     sort,
-    toggleSortField,
+    setSortField,
     isLoading,
     isError,
     isLoadingMore,
@@ -43,9 +43,9 @@ export const SongsTab = (): React.JSX.Element => {
 
   const header = useCallback(
     () => (
-      <SongsHeader songCount={songCount} sort={sort} onSortFieldPress={toggleSortField} />
+      <SongsHeader songCount={songCount} sort={sort} onSortFieldPress={setSortField} />
     ),
-    [songCount, sort, toggleSortField],
+    [songCount, sort, setSortField],
   );
 
   const footer = useCallback(
