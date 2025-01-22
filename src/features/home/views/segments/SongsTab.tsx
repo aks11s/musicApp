@@ -1,14 +1,24 @@
 import React, {useCallback} from 'react';
-import {ActivityIndicator, FlatList, View} from 'react-native';
+import {FlatList, View} from 'react-native';
+import Animated, {
+  runOnJS,
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from 'react-native-reanimated';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import type {Track} from '../../../../domain/types';
 import {formatDuration} from '../../../../shared/lib/formatDuration';
 import {EmptyState} from '../../../../shared/ui/EmptyState';
 import {TrackRow} from '../../../../shared/ui/TrackRow';
-import {TRACK_ROW_HEIGHT} from '../../models/constants';
+import {SONGS_PULL_TRIGGER, TRACK_ROW_HEIGHT} from '../../models/constants';
 import {useSongsViewModel} from '../../viewmodels/useSongsViewModel';
 import {SongsHeader} from '../components/SongsHeader';
+import {SongsLoadMoreFooter} from '../components/SongsLoadMoreFooter';
 import {TrackRowSkeletonList} from '../loaders/TrackRowSkeleton';
+
+const AnimatedFlatList = Animated.createAnimatedComponent(
+  FlatList<Track>,
+);
 
 const keyExtractor = (track: Track): string => track.id;
 
@@ -27,7 +37,7 @@ const renderItem = ({item}: {item: Track}): React.JSX.Element => (
 );
 
 export const SongsTab = (): React.JSX.Element => {
-  const {styles, theme} = useStyles(stylesheet);
+  const {styles} = useStyles(stylesheet);
 
   const {
     songs,
@@ -40,14 +50,28 @@ export const SongsTab = (): React.JSX.Element => {
     isLoadingMore,
     loadMore,
     allowLoadMore,
+    hasMore,
   } = useSongsViewModel();
 
+  const overscroll = useSharedValue(0);
+  const hasFired = useSharedValue(false);
+
+  const handleScroll = useAnimatedScrollHandler(event => {
+    const pulled =
+      event.contentOffset.y + event.layoutMeasurement.height - event.contentSize.height;
+    overscroll.value = Math.max(pulled, 0);
+
+    if (pulled >= SONGS_PULL_TRIGGER && !hasFired.value) {
+      hasFired.value = true;
+      runOnJS(loadMore)();
+    } else if (pulled <= 0) {
+      hasFired.value = false;
+    }
+  });
+
   const footer = useCallback(
-    () =>
-      isLoadingMore ? (
-        <ActivityIndicator style={styles.footer} color={theme.colors.accent} />
-      ) : null,
-    [isLoadingMore, styles.footer, theme.colors.accent],
+    () => (hasMore ? <SongsLoadMoreFooter overscroll={overscroll} /> : null),
+    [hasMore, overscroll],
   );
 
   return (
@@ -60,23 +84,23 @@ export const SongsTab = (): React.JSX.Element => {
         onDirectionPress={toggleSortDirection}
       />
 
-      {isLoading ? (
+      {isLoading || isLoadingMore ? (
         <View style={styles.loadingContainer}>
           <TrackRowSkeletonList />
         </View>
       ) : isError ? (
         <EmptyState icon="cloud-offline-outline" text="Couldn't load songs" />
       ) : (
-        <FlatList
+        <AnimatedFlatList
           data={songs}
           keyExtractor={keyExtractor}
           renderItem={renderItem}
           getItemLayout={getItemLayout}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
-          onEndReached={loadMore}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
           onScrollBeginDrag={allowLoadMore}
-          onEndReachedThreshold={0.1}
           initialNumToRender={12}
           maxToRenderPerBatch={6}
           updateCellsBatchingPeriod={60}
@@ -100,8 +124,5 @@ const stylesheet = createStyleSheet(theme => ({
   loadingContainer: {
     paddingHorizontal: theme.spacing.md,
     paddingTop: theme.spacing.xl,
-  },
-  footer: {
-    paddingVertical: theme.spacing.lg,
   },
 }));

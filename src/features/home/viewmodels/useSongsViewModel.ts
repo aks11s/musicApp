@@ -5,10 +5,12 @@ import {uniqueById} from '../../../shared/lib/collections';
 import {SONGS_PAGE_SIZE} from '../models/constants';
 import {
   canLoadMoreSongs,
+  hasMoreSongs,
   withFlippedSongSort,
   withSongSortField,
   nextSongsOffset,
   putPageAt,
+  remainingSkeletonMs,
   selectSortedSongs,
 } from '../models/selectors';
 import type {SongSort, SongSortField} from '../models/types';
@@ -22,6 +24,7 @@ export type SongsViewModel = {
   isLoading: boolean;
   isError: boolean;
   isLoadingMore: boolean;
+  hasMore: boolean;
   loadMore: () => void;
   allowLoadMore: () => void;
 };
@@ -30,6 +33,8 @@ export const useSongsViewModel = (): SongsViewModel => {
   const [offset, setOffset] = useState(0);
   const [pages, setPages] = useState<Track[][]>([]);
   const [sort, setSort] = useState<SongSort>({field: 'title', isAscending: true});
+  const [isSettling, setSettling] = useState(false);
+  const settleStartedAt = useRef(0);
 
   const {data, isLoading, isError, isFetching} = useGetTrendingTracksPageQuery({
     offset,
@@ -48,7 +53,25 @@ export const useSongsViewModel = (): SongsViewModel => {
   const loaded = useMemo(() => uniqueById(pages.flat()), [pages]);
   const songs = useMemo(() => selectSortedSongs(loaded, sort), [loaded, sort]);
 
-  const isLoadingMore = isFetching && loaded.length > 0;
+  useEffect(() => {
+    if (!isFetching) {
+      return;
+    }
+    settleStartedAt.current = Date.now();
+    setSettling(true);
+  }, [isFetching]);
+
+  useEffect(() => {
+    if (isFetching || !isSettling) {
+      return;
+    }
+    const remaining = remainingSkeletonMs(Date.now() - settleStartedAt.current);
+    const timer = setTimeout(() => setSettling(false), remaining);
+    return () => clearTimeout(timer);
+  }, [isFetching, isSettling]);
+
+  const isLoadingMore = (isFetching || isSettling) && loaded.length > 0;
+  const hasMore = hasMoreSongs(offset);
 
   const hasScrolled = useRef(false);
   const requestedOffset = useRef(0);
@@ -89,6 +112,7 @@ export const useSongsViewModel = (): SongsViewModel => {
     isLoading: isLoading && loaded.length === 0,
     isError,
     isLoadingMore,
+    hasMore,
     loadMore,
     allowLoadMore,
   };

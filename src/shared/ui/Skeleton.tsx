@@ -1,5 +1,11 @@
-import React, {useEffect, useRef} from 'react';
-import {Animated, type ViewStyle, type StyleProp} from 'react-native';
+import React, {useEffect} from 'react';
+import {type ViewStyle, type StyleProp} from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 
 const PULSE_DURATION = 700;
@@ -14,32 +20,20 @@ type SkeletonProps = {
 
 export const Skeleton = ({width, height, radius, style}: SkeletonProps): React.JSX.Element => {
   const {styles, theme} = useStyles(stylesheet);
-  const opacity = useRef(new Animated.Value(MIN_OPACITY)).current;
+  const opacity = useSharedValue(MIN_OPACITY);
 
   useEffect(() => {
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: PULSE_DURATION,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: MIN_OPACITY,
-          duration: PULSE_DURATION,
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    pulse.start();
-    return () => pulse.stop();
+    opacity.value = withRepeat(withTiming(1, {duration: PULSE_DURATION}), -1, true);
   }, [opacity]);
+
+  const pulse = useAnimatedStyle(() => ({opacity: opacity.value}));
 
   return (
     <Animated.View
       style={[
         styles.block,
-        {width, height, borderRadius: radius ?? theme.radii.sm, opacity},
+        {width, height, borderRadius: radius ?? theme.radii.sm},
+        pulse,
         style,
       ]}
     />

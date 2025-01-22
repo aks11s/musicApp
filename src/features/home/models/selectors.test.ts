@@ -1,4 +1,4 @@
-import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE} from './constants';
+import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE, SONGS_SKELETON_MIN_MS} from './constants';
 import {
   canLoadMoreSongs,
   hasMoreSongs,
@@ -6,6 +6,7 @@ import {
   withSongSortField,
   nextSongsOffset,
   putPageAt,
+  remainingSkeletonMs,
   selectSortedSongs,
 } from './selectors';
 import type {Track} from '../../../domain/types';
@@ -237,5 +238,21 @@ describe('canLoadMoreSongs', () => {
     const atCeiling = {...ready, offset: SONGS_MAX_OFFSET, requestedOffset: SONGS_MAX_OFFSET};
 
     expect(canLoadMoreSongs(atCeiling)).toBe(false);
+  });
+});
+
+describe('remainingSkeletonMs', () => {
+  it('waits out the whole minimum when nothing has elapsed', () => {
+    expect(remainingSkeletonMs(0)).toBe(SONGS_SKELETON_MIN_MS);
+  });
+
+  it('waits out only what is left', () => {
+    expect(remainingSkeletonMs(300)).toBe(SONGS_SKELETON_MIN_MS - 300);
+  });
+
+  // a slow page has already outlasted the minimum, so it releases at once
+  it('returns zero once the minimum has passed', () => {
+    expect(remainingSkeletonMs(SONGS_SKELETON_MIN_MS)).toBe(0);
+    expect(remainingSkeletonMs(SONGS_SKELETON_MIN_MS + 500)).toBe(0);
   });
 });

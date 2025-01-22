@@ -16,9 +16,10 @@ export const SONG_SORT_LABELS = {
 
 export const SONGS_PAGE_SIZE = 50;
 export const SONGS_MAX_OFFSET = 200;
-
 export const SKELETON_COUNT = 4;
 export const SONGS_SKELETON_COUNT = 8;
+export const SONGS_SKELETON_MIN_MS = 900;
+export const SONGS_PULL_TRIGGER = 90;
 
 // mirrors the artwork size inside shared/ui TrackRow — shared/ cannot import a
 // feature's constants, so the skeleton repeats it to keep the same geometry
