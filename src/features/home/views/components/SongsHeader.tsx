@@ -2,14 +2,18 @@ import React, {useCallback, useState} from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {Skeleton} from '../../../../shared/ui/Skeleton';
 import {SONG_SORT_LABELS} from '../../models/constants';
 import type {SongSort, SongSortField} from '../../models/types';
 import {SongsSortSheet} from './SongsSortSheet';
 
 const DIRECTION_ICON_SIZE = 20;
+const COUNT_SKELETON_WIDTH = 80;
+const COUNT_SKELETON_HEIGHT = 15;
 
 type SongsHeaderProps = {
   songCount: number;
+  isCountLoading: boolean;
   sort: SongSort;
   onSortFieldChange: (field: SongSortField) => void;
   onDirectionPress: () => void;
@@ -18,6 +22,7 @@ type SongsHeaderProps = {
 export const SongsHeader = React.memo(
   ({
     songCount,
+    isCountLoading,
     sort,
     onSortFieldChange,
     onDirectionPress,
@@ -38,7 +43,11 @@ export const SongsHeader = React.memo(
 
     return (
       <View style={styles.header}>
-        <Text style={styles.count}>{songCount} songs</Text>
+        {isCountLoading ? (
+          <Skeleton width={COUNT_SKELETON_WIDTH} height={COUNT_SKELETON_HEIGHT} />
+        ) : (
+          <Text style={styles.count}>{songCount} songs</Text>
+        )}
 
         <View style={styles.sortControl}>
           <TouchableOpacity onPress={openSheet}>

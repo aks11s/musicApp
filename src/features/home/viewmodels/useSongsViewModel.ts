@@ -18,6 +18,7 @@ import type {SongSort, SongSortField} from '../models/types';
 export type SongsViewModel = {
   songs: Track[];
   songCount: number;
+  isCountLoading: boolean;
   sort: SongSort;
   setSortField: (field: SongSortField) => void;
   toggleSortDirection: () => void;
@@ -106,6 +107,7 @@ export const useSongsViewModel = (): SongsViewModel => {
   return {
     songs,
     songCount: loaded.length,
+    isCountLoading: loaded.length === 0 && !isError,
     sort,
     setSortField,
     toggleSortDirection,

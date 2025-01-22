@@ -42,6 +42,7 @@ export const SongsTab = (): React.JSX.Element => {
   const {
     songs,
     songCount,
+    isCountLoading,
     sort,
     setSortField,
     toggleSortDirection,
@@ -79,6 +80,7 @@ export const SongsTab = (): React.JSX.Element => {
       {/* outside the list so the count and sort control stay put while scrolling */}
       <SongsHeader
         songCount={songCount}
+        isCountLoading={isCountLoading}
         sort={sort}
         onSortFieldChange={setSortField}
         onDirectionPress={toggleSortDirection}
