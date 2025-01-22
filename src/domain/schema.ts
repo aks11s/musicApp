@@ -14,6 +14,7 @@ export const trackDtoSchema = z.object({
   title: z.string(),
   duration: z.number(),
   artwork: artworkSchema,
+  release_date: z.string().nullish(),
   user: z.object({
     name: z.string(),
   }),

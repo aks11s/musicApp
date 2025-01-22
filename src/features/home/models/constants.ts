@@ -4,7 +4,7 @@ export const TOP_ARTISTS_LIMIT = 7;
 
 export const UNDERGROUND_TRACKS_LIMIT = 10;
 
-export const SONG_SORT_FIELDS = ['title', 'duration'] as const;
+export const SONG_SORT_FIELDS = ['title', 'artist', 'duration', 'year'] as const;
 
 
 export const SONGS_PAGE_SIZE = 50;

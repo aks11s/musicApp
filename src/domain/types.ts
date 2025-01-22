@@ -4,6 +4,7 @@ export type Track = {
   artist: string;
   artworkUrl: string;
   durationSeconds: number;
+  releaseDate: string;
 };
 
 export type Artist = {

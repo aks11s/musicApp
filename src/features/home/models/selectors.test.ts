@@ -15,6 +15,7 @@ const track = (id: string, title: string, durationSeconds: number): Track => ({
   artist: 'Someone',
   artworkUrl: '',
   durationSeconds,
+  releaseDate: '2024-01-01T00:00:00Z',
 });
 
 const tracks = [

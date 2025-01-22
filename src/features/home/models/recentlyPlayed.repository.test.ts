@@ -14,6 +14,7 @@ const makeTrack = (id: string): Track => ({
   artist: 'Someone',
   artworkUrl: `https://example.test/${id}.jpg`,
   durationSeconds: 180,
+  releaseDate: '2024-01-01T00:00:00Z',
 });
 
 const writtenHistory = (): Track[] => mockWrite.mock.calls[0][0] as Track[];

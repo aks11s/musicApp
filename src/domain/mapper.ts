@@ -7,6 +7,7 @@ export const mapTrackDtoToTrack = (dto: TrackDto): Track => ({
   artist: dto.user.name,
   artworkUrl: dto.artwork?.['480x480'] ?? dto.artwork?.['150x150'] ?? '',
   durationSeconds: dto.duration,
+  releaseDate: dto.release_date ?? '',
 });
 
 export const mapUserDtoToArtist = (dto: UserDto): Artist => ({

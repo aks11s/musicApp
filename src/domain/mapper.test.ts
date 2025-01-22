@@ -6,6 +6,7 @@ const trendingTrackFixture = {
   id: '7eP5n',
   title: 'Midnight City Lights',
   duration: 214,
+  release_date: '2024-03-11T09:15:00Z',
   play_count: 128340,
   genre: 'Electronic',
   artwork: {
@@ -73,7 +74,15 @@ describe('mapTrackDtoToTrack', () => {
       artist: 'Nova Wave',
       artworkUrl: 'https://discoveryprovider.audius.co/artwork/480x480.jpg',
       durationSeconds: 214,
+      releaseDate: '2024-03-11T09:15:00Z',
     });
+  });
+
+  // a single missing date must not fail the response, so the mapper absorbs it
+  it('falls back to an empty release date when the API omits it', () => {
+    const dto = trackDtoSchema.parse({...trendingTrackFixture, release_date: null});
+
+    expect(mapTrackDtoToTrack(dto).releaseDate).toBe('');
   });
 
   it('falls back to an empty artwork url when artwork is missing', () => {
