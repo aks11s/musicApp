@@ -34,19 +34,13 @@ export const SongsTab = (): React.JSX.Element => {
     songCount,
     sort,
     setSortField,
+    toggleSortDirection,
     isLoading,
     isError,
     isLoadingMore,
     loadMore,
     allowLoadMore,
   } = useSongsViewModel();
-
-  const header = useCallback(
-    () => (
-      <SongsHeader songCount={songCount} sort={sort} onSortFieldPress={setSortField} />
-    ),
-    [songCount, sort, setSortField],
-  );
 
   const footer = useCallback(
     () =>
@@ -56,41 +50,49 @@ export const SongsTab = (): React.JSX.Element => {
     [isLoadingMore, styles.footer, theme.colors.accent],
   );
 
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <TrackRowSkeletonList />
-      </View>
-    );
-  }
-
-  if (isError) {
-    return <EmptyState icon="cloud-offline-outline" text="Couldn't load songs" />;
-  }
-
   return (
-    <FlatList
-      data={songs}
-      keyExtractor={keyExtractor}
-      renderItem={renderItem}
-      getItemLayout={getItemLayout}
-      contentContainerStyle={styles.list}
-      showsVerticalScrollIndicator={false}
-      onEndReached={loadMore}
-      onScrollBeginDrag={allowLoadMore}
-      onEndReachedThreshold={0.1}
-      initialNumToRender={12}
-      maxToRenderPerBatch={6}
-      updateCellsBatchingPeriod={60}
-      windowSize={7}
-      removeClippedSubviews
-      ListHeaderComponent={header}
-      ListFooterComponent={footer}
-    />
+    <View style={styles.container}>
+      {/* outside the list so the count and sort control stay put while scrolling */}
+      <SongsHeader
+        songCount={songCount}
+        sort={sort}
+        onSortFieldChange={setSortField}
+        onDirectionPress={toggleSortDirection}
+      />
+
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <TrackRowSkeletonList />
+        </View>
+      ) : isError ? (
+        <EmptyState icon="cloud-offline-outline" text="Couldn't load songs" />
+      ) : (
+        <FlatList
+          data={songs}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          getItemLayout={getItemLayout}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          onEndReached={loadMore}
+          onScrollBeginDrag={allowLoadMore}
+          onEndReachedThreshold={0.1}
+          initialNumToRender={12}
+          maxToRenderPerBatch={6}
+          updateCellsBatchingPeriod={60}
+          windowSize={7}
+          removeClippedSubviews
+          ListFooterComponent={footer}
+        />
+      )}
+    </View>
   );
 };
 
 const stylesheet = createStyleSheet(theme => ({
+  container: {
+    flex: 1,
+  },
   list: {
     paddingHorizontal: theme.spacing.md,
     paddingBottom: theme.spacing.xxl,

@@ -1,37 +1,68 @@
-import React from 'react';
+import React, {useCallback, useState} from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
-import {SONG_SORT_FIELDS, SONG_SORT_LABELS} from '../../models/constants';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {SONG_SORT_LABELS} from '../../models/constants';
 import type {SongSort, SongSortField} from '../../models/types';
+import {SongsSortSheet} from './SongsSortSheet';
+
+const DIRECTION_ICON_SIZE = 20;
 
 type SongsHeaderProps = {
   songCount: number;
   sort: SongSort;
-  onSortFieldPress: (field: SongSortField) => void;
+  onSortFieldChange: (field: SongSortField) => void;
+  onDirectionPress: () => void;
 };
 
 export const SongsHeader = React.memo(
-  ({songCount, sort, onSortFieldPress}: SongsHeaderProps): React.JSX.Element => {
-    const {styles} = useStyles(stylesheet);
+  ({
+    songCount,
+    sort,
+    onSortFieldChange,
+    onDirectionPress,
+  }: SongsHeaderProps): React.JSX.Element => {
+    const {styles, theme} = useStyles(stylesheet);
+    const [isSheetOpen, setSheetOpen] = useState(false);
+
+    const openSheet = useCallback(() => setSheetOpen(true), []);
+    const closeSheet = useCallback(() => setSheetOpen(false), []);
+
+    const selectField = useCallback(
+      (field: SongSortField) => {
+        onSortFieldChange(field);
+        setSheetOpen(false);
+      },
+      [onSortFieldChange],
+    );
 
     return (
       <View style={styles.header}>
         <Text style={styles.count}>{songCount} songs</Text>
 
-        <View style={styles.sortGroup}>
-          {SONG_SORT_FIELDS.map(field => {
-            const isActive = sort.field === field;
-            return (
-              <SortButton
-                key={field}
-                field={field}
-                isActive={isActive}
-                isAscending={sort.isAscending}
-                onPress={onSortFieldPress}
-              />
-            );
-          })}
+        <View style={styles.sortControl}>
+          <TouchableOpacity onPress={openSheet}>
+            <Text style={styles.sortLabel}>{SONG_SORT_LABELS[sort.field]}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={onDirectionPress} style={styles.directionButton}>
+            {/* the icon reads the same either way, so flipping it shows the direction */}
+            <Ionicons
+              name="swap-vertical"
+              size={DIRECTION_ICON_SIZE}
+              color={theme.colors.accent}
+              style={sort.isAscending ? undefined : styles.flipped}
+            />
+          </TouchableOpacity>
         </View>
+
+        {isSheetOpen ? (
+          <SongsSortSheet
+            activeField={sort.field}
+            onSelect={selectField}
+            onClose={closeSheet}
+          />
+        ) : null}
       </View>
     );
   },
@@ -39,34 +70,10 @@ export const SongsHeader = React.memo(
 
 SongsHeader.displayName = 'SongsHeader';
 
-type SortButtonProps = {
-  field: SongSortField;
-  isActive: boolean;
-  isAscending: boolean;
-  onPress: (field: SongSortField) => void;
-};
-
-// own component so the arrow function bound to `field` does not live in a list map
-const SortButton = React.memo(
-  ({field, isActive, isAscending, onPress}: SortButtonProps): React.JSX.Element => {
-    const {styles} = useStyles(stylesheet);
-    const handlePress = React.useCallback(() => onPress(field), [onPress, field]);
-
-    return (
-      <TouchableOpacity onPress={handlePress}>
-        <Text style={[styles.sortLabel, isActive && styles.sortLabelActive]}>
-          {SONG_SORT_LABELS[field]}
-          {isActive ? (isAscending ? ' ↑' : ' ↓') : ''}
-        </Text>
-      </TouchableOpacity>
-    );
-  },
-);
-
-SortButton.displayName = 'SortButton';
-
 const stylesheet = createStyleSheet(theme => ({
   header: {
+    // keeps the sort card above the list below it
+    zIndex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -76,19 +83,23 @@ const stylesheet = createStyleSheet(theme => ({
   },
   count: {
     fontFamily: theme.typography.families.semibold,
-    fontSize: theme.typography.sizes.label,
+    fontSize: theme.typography.sizes.subtitle,
     color: theme.colors.text,
   },
-  sortGroup: {
+  sortControl: {
     flexDirection: 'row',
-    gap: theme.spacing.md,
+    alignItems: 'center',
+    gap: theme.spacing.sm,
   },
   sortLabel: {
     fontFamily: theme.typography.families.semibold,
-    fontSize: theme.typography.sizes.body,
-    color: theme.colors.textMuted,
-  },
-  sortLabelActive: {
+    fontSize: theme.typography.sizes.subtitle,
     color: theme.colors.accent,
+  },
+  directionButton: {
+    paddingVertical: theme.spacing.xs,
+  },
+  flipped: {
+    transform: [{rotate: '180deg'}],
   },
 }));
