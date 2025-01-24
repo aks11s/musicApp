@@ -22,7 +22,6 @@ const track = (id: string): Track => ({
 const page = (offset: number): Track[] =>
   Array.from({length: SONGS_PAGE_SIZE}, (_, i) => track(String(offset + i)));
 
-// one stable array per offset — a fresh one each render would loop the page effect
 const pagesByOffset = new Map<number, Track[]>();
 const pageAt = (offset: number): Track[] => {
   if (!pagesByOffset.has(offset)) {
