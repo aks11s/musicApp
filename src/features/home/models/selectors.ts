@@ -1,6 +1,12 @@
 import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE, SONGS_SKELETON_MIN_MS} from './constants';
 import type {Artist, Track} from '../../../domain/types';
-import type {SongSort, SongSortField, SongsLoadState} from './types';
+import type {
+  ArtistSort,
+  ArtistSortField,
+  SongSort,
+  SongSortField,
+  SongsLoadState,
+} from './types';
 
 export const selectMostPopularArtists = (artists: Artist[], limit: number): Artist[] =>
   [...artists].sort((a, b) => b.followerCount - a.followerCount).slice(0, limit);
@@ -36,6 +42,30 @@ export const withFlippedSongSort = (current: SongSort): SongSort => ({
   isAscending: !current.isAscending,
 });
 
+const compareArtistsByField = (a: Artist, b: Artist, field: ArtistSortField): number => {
+  switch (field) {
+    case 'name':
+      return titleCollator.compare(a.name, b.name);
+    case 'followers':
+      return a.followerCount - b.followerCount;
+    case 'songs':
+      return a.trackCount - b.trackCount;
+  }
+};
+
+export const selectSortedArtists = (artists: Artist[], sort: ArtistSort): Artist[] =>
+  [...artists].sort((a, b) => {
+    const result = compareArtistsByField(a, b, sort.field);
+    return sort.isAscending ? result : -result;
+  });
+
+export const withArtistSortField = (current: ArtistSort, field: ArtistSortField): ArtistSort =>
+  current.field === field ? current : {field, isAscending: true};
+
+export const withFlippedArtistSort = (current: ArtistSort): ArtistSort => ({
+  ...current,
+  isAscending: !current.isAscending,
+});
 
 export const hasMoreSongs = (offset: number): boolean => offset < SONGS_MAX_OFFSET;
 

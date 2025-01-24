@@ -13,6 +13,15 @@ export const SONG_SORT_LABELS = {
   year: 'Year',
 } as const;
 
+export const ARTISTS_LIMIT = 100;
+
+export const ARTIST_SORT_FIELDS = ['name', 'followers', 'songs'] as const;
+
+export const ARTIST_SORT_LABELS = {
+  name: 'Name',
+  followers: 'Followers',
+  songs: 'Songs',
+} as const;
 
 export const SONGS_PAGE_SIZE = 50;
 export const SONGS_MAX_OFFSET = 200;

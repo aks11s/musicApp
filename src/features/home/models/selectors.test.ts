@@ -1,6 +1,9 @@
 import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE, SONGS_SKELETON_MIN_MS} from './constants';
 import {
   canLoadMoreSongs,
+  selectSortedArtists,
+  withArtistSortField,
+  withFlippedArtistSort,
   hasMoreSongs,
   withFlippedSongSort,
   withSongSortField,
@@ -9,7 +12,7 @@ import {
   remainingSkeletonMs,
   selectSortedSongs,
 } from './selectors';
-import type {Track} from '../../../domain/types';
+import type {Artist, Track} from '../../../domain/types';
 
 const track = (
   id: string,
@@ -153,6 +156,78 @@ describe('withFlippedSongSort', () => {
     expect(withFlippedSongSort({field: 'year', isAscending: false})).toEqual({
       field: 'year',
       isAscending: true,
+    });
+  });
+});
+
+const artist = (
+  id: string,
+  name: string,
+  followerCount: number,
+  trackCount: number,
+): Artist => ({
+  id,
+  name,
+  handle: name.toLowerCase(),
+  avatarUrl: '',
+  followerCount,
+  albumCount: 0,
+  trackCount,
+});
+
+const artists = [
+  artist('1', 'zedd', 513, 1),
+  artist('2', 'Aluna', 273, 39),
+  artist('3', 'ODESZA', 220, 81),
+];
+
+describe('selectSortedArtists', () => {
+  it('sorts by name ignoring case', () => {
+    const sorted = selectSortedArtists(artists, {field: 'name', isAscending: true});
+
+    expect(sorted.map(a => a.name)).toEqual(['Aluna', 'ODESZA', 'zedd']);
+  });
+
+  it('sorts by followers descending', () => {
+    const sorted = selectSortedArtists(artists, {field: 'followers', isAscending: false});
+
+    expect(sorted.map(a => a.name)).toEqual(['zedd', 'Aluna', 'ODESZA']);
+  });
+
+  it('sorts by song count ascending', () => {
+    const sorted = selectSortedArtists(artists, {field: 'songs', isAscending: true});
+
+    expect(sorted.map(a => a.name)).toEqual(['zedd', 'Aluna', 'ODESZA']);
+  });
+
+  it('does not mutate the input', () => {
+    const input = [...artists];
+
+    selectSortedArtists(input, {field: 'name', isAscending: true});
+
+    expect(input).toEqual(artists);
+  });
+});
+
+describe('withArtistSortField', () => {
+  it('keeps the direction when the field is unchanged', () => {
+    const current = {field: 'followers', isAscending: false} as const;
+
+    expect(withArtistSortField(current, 'followers')).toBe(current);
+  });
+
+  it('resets to ascending on a new field', () => {
+    const current = {field: 'followers', isAscending: false} as const;
+
+    expect(withArtistSortField(current, 'name')).toEqual({field: 'name', isAscending: true});
+  });
+});
+
+describe('withFlippedArtistSort', () => {
+  it('flips the direction and keeps the field', () => {
+    expect(withFlippedArtistSort({field: 'songs', isAscending: true})).toEqual({
+      field: 'songs',
+      isAscending: false,
     });
   });
 });
