@@ -1,4 +1,4 @@
-import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE, SONGS_SKELETON_MIN_MS} from './constants';
+import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE} from './constants';
 import type {Artist, Track} from '../../../domain/types';
 import {sortBy} from '../../../shared/lib/sort';
 import type {
@@ -53,9 +53,6 @@ export const nextSongsOffset = (offset: number): number => offset + SONGS_PAGE_S
 export const canLoadMoreSongs = ({ hasScrolled, isFetching, offset, requestedOffset }: SongsLoadState): boolean => {
   return hasScrolled && !isFetching && hasMoreSongs(offset) && requestedOffset === offset;
 };
-
-export const remainingSkeletonMs = (elapsedMs: number): number =>
-  Math.max(SONGS_SKELETON_MIN_MS - elapsedMs, 0);
 
 export const putPageAt = <T>(pages: T[], index: number, page: T): T[] => {
   if (pages[index] === page) {

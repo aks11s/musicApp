@@ -1,15 +1,15 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import type {Track} from '../../../domain/types';
 import {useGetTrendingTracksPageQuery} from '../../../services/api/tracks';
+import {useMinLoadingTime} from '../../../shared/hooks/useMinLoadingTime';
+import {useSort} from '../../../shared/hooks/useSort';
 import {uniqueById} from '../../../shared/lib/collections';
-import {withFlippedSort, withSortField} from '../../../shared/lib/sort';
-import {SONGS_PAGE_SIZE} from '../models/constants';
+import {SONGS_PAGE_SIZE, SONGS_SKELETON_MIN_MS} from '../models/constants';
 import {
   canLoadMoreSongs,
   hasMoreSongs,
   nextSongsOffset,
   putPageAt,
-  remainingSkeletonMs,
   selectSortedSongs,
 } from '../models/selectors';
 import type {SongSort, SongSortField} from '../models/types';
@@ -32,9 +32,10 @@ export type SongsViewModel = {
 export const useSongsViewModel = (): SongsViewModel => {
   const [offset, setOffset] = useState(0);
   const [pages, setPages] = useState<Track[][]>([]);
-  const [sort, setSort] = useState<SongSort>({field: 'title', isAscending: true});
-  const [isSettling, setSettling] = useState(false);
-  const settleStartedAt = useRef(0);
+  const {sort, setSortField, toggleSortDirection} = useSort<SongSortField>({
+    field: 'title',
+    isAscending: true,
+  });
 
   const {data, isLoading, isError, isFetching} = useGetTrendingTracksPageQuery({
     offset,
@@ -53,24 +54,8 @@ export const useSongsViewModel = (): SongsViewModel => {
   const loaded = useMemo(() => uniqueById(pages.flat()), [pages]);
   const songs = useMemo(() => selectSortedSongs(loaded, sort), [loaded, sort]);
 
-  useEffect(() => {
-    if (!isFetching) {
-      return;
-    }
-    settleStartedAt.current = Date.now();
-    setSettling(true);
-  }, [isFetching]);
-
-  useEffect(() => {
-    if (isFetching || !isSettling) {
-      return;
-    }
-    const remaining = remainingSkeletonMs(Date.now() - settleStartedAt.current);
-    const timer = setTimeout(() => setSettling(false), remaining);
-    return () => clearTimeout(timer);
-  }, [isFetching, isSettling]);
-
-  const isLoadingMore = (isFetching || isSettling) && loaded.length > 0;
+  const isSkeletonShown = useMinLoadingTime(isFetching, SONGS_SKELETON_MIN_MS);
+  const isLoadingMore = isSkeletonShown && loaded.length > 0;
   const hasMore = hasMoreSongs(offset);
 
   const hasScrolled = useRef(false);
@@ -94,14 +79,6 @@ export const useSongsViewModel = (): SongsViewModel => {
     requestedOffset.current = next;
     setOffset(next);
   }, [isFetching, offset]);
-
-  const setSortField = useCallback((field: SongSortField) => {
-    setSort(current => withSortField(current, field));
-  }, []);
-
-  const toggleSortDirection = useCallback(() => {
-    setSort(withFlippedSort);
-  }, []);
 
   return {
     songs,

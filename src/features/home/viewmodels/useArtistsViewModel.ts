@@ -1,6 +1,6 @@
-import {useCallback, useMemo, useState} from 'react';
+import {useMemo} from 'react';
 import {useGetTopArtistsQuery} from '../../../services/api/users';
-import {withFlippedSort, withSortField} from '../../../shared/lib/sort';
+import {useSort} from '../../../shared/hooks/useSort';
 import {ARTISTS_LIMIT} from '../models/constants';
 import {formatArtistStats} from '../models/formatters';
 import {selectSortedArtists} from '../models/selectors';
@@ -25,7 +25,10 @@ export type ArtistsViewModel = {
 };
 
 export const useArtistsViewModel = (): ArtistsViewModel => {
-  const [sort, setSort] = useState<ArtistSort>({field: 'followers', isAscending: false});
+  const {sort, setSortField, toggleSortDirection} = useSort<ArtistSortField>({
+    field: 'followers',
+    isAscending: false,
+  });
 
   const {data, isLoading, isError} = useGetTopArtistsQuery(ARTISTS_LIMIT);
 
@@ -39,14 +42,6 @@ export const useArtistsViewModel = (): ArtistsViewModel => {
       })),
     [data, sort],
   );
-
-  const setSortField = useCallback((field: ArtistSortField) => {
-    setSort(current => withSortField(current, field));
-  }, []);
-
-  const toggleSortDirection = useCallback(() => {
-    setSort(withFlippedSort);
-  }, []);
 
   return {
     artists,
