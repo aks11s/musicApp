@@ -28,6 +28,8 @@ const userFixture = {
   handle: 'novawave',
   name: 'Nova Wave',
   follower_count: 5210,
+  album_count: 2,
+  track_count: 24,
   is_verified: true,
   profile_picture: {
     '150x150': 'https://discoveryprovider.audius.co/profile/150x150.jpg',
@@ -113,6 +115,8 @@ describe('mapUserDtoToArtist', () => {
       handle: 'novawave',
       avatarUrl: 'https://discoveryprovider.audius.co/profile/480x480.jpg',
       followerCount: 5210,
+      albumCount: 2,
+      trackCount: 24,
     });
   });
 

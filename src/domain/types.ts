@@ -13,6 +13,8 @@ export type Artist = {
   handle: string;
   avatarUrl: string;
   followerCount: number;
+  albumCount: number;
+  trackCount: number;
 };
 
 export type RemotePlaylist = {
