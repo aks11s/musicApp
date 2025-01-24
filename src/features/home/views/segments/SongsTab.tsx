@@ -9,10 +9,15 @@ import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import type {Track} from '../../../../domain/types';
 import {formatDuration} from '../../../../shared/lib/formatDuration';
 import {EmptyState} from '../../../../shared/ui/EmptyState';
+import {SortHeader} from '../../../../shared/ui/SortHeader';
 import {TrackRow} from '../../../../shared/ui/TrackRow';
-import {SONGS_PULL_TRIGGER, TRACK_ROW_HEIGHT} from '../../models/constants';
+import {
+  SONG_SORT_FIELDS,
+  SONG_SORT_LABELS,
+  SONGS_PULL_TRIGGER,
+  TRACK_ROW_HEIGHT,
+} from '../../models/constants';
 import {useSongsViewModel} from '../../viewmodels/useSongsViewModel';
-import {SongsHeader} from '../components/SongsHeader';
 import {SongsLoadMoreFooter} from '../components/SongsLoadMoreFooter';
 import {TrackRowSkeletonList} from '../loaders/TrackRowSkeleton';
 
@@ -78,10 +83,13 @@ export const SongsTab = (): React.JSX.Element => {
   return (
     <View style={styles.container}>
       {/* outside the list so the count and sort control stay put while scrolling */}
-      <SongsHeader
-        songCount={songCount}
+      <SortHeader
+        countLabel={`${songCount} songs`}
         isCountLoading={isCountLoading}
-        sort={sort}
+        fields={SONG_SORT_FIELDS}
+        labels={SONG_SORT_LABELS}
+        activeField={sort.field}
+        isAscending={sort.isAscending}
         onSortFieldChange={setSortField}
         onDirectionPress={toggleSortDirection}
       />

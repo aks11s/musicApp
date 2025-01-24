@@ -2,24 +2,26 @@ import React from 'react';
 import {Dimensions, Pressable, Text, View} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {SONG_SORT_FIELDS, SONG_SORT_LABELS} from '../../models/constants';
-import type {SongSortField} from '../../models/types';
 
 const RADIO_SIZE = 20;
 const CARD_WIDTH = 160;
 const SCREEN = Dimensions.get('window');
 
-type SongsSortSheetProps = {
-  activeField: SongSortField;
-  onSelect: (field: SongSortField) => void;
+type SortSheetProps<F extends string> = {
+  fields: readonly F[];
+  labels: Record<F, string>;
+  activeField: F;
+  onSelect: (field: F) => void;
   onClose: () => void;
 };
 
-export const SongsSortSheet = ({
+export const SortSheet = <F extends string>({
+  fields,
+  labels,
   activeField,
   onSelect,
   onClose,
-}: SongsSortSheetProps): React.JSX.Element => {
+}: SortSheetProps<F>): React.JSX.Element => {
   const {styles, theme} = useStyles(stylesheet);
 
   return (
@@ -28,14 +30,14 @@ export const SongsSortSheet = ({
       <Pressable style={styles.backdrop} onPress={onClose} />
 
       <View style={styles.card}>
-        {SONG_SORT_FIELDS.map((field, index) => {
+        {fields.map((field, index) => {
           const isActive = field === activeField;
           return (
             <Pressable
               key={field}
               style={[styles.option, index > 0 && styles.optionDivided]}
               onPress={() => onSelect(field)}>
-              <Text style={styles.label}>{SONG_SORT_LABELS[field]}</Text>
+              <Text style={styles.label}>{labels[field]}</Text>
               <Ionicons
                 name={isActive ? 'radio-button-on' : 'radio-button-off'}
                 size={RADIO_SIZE}
