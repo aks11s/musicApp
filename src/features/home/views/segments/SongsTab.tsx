@@ -17,7 +17,7 @@ import {
   SONGS_PULL_TRIGGER,
   TRACK_ROW_HEIGHT,
 } from '../../models/constants';
-import {useSongsViewModel} from '../../viewmodels/useSongsViewModel';
+import {useSongsViewModel} from '../../viewmodels/songs/useSongsViewModel';
 import {SongsLoadMoreFooter} from '../components/SongsLoadMoreFooter';
 import {TrackRowSkeletonList} from '../loaders/TrackRowSkeleton';
 
