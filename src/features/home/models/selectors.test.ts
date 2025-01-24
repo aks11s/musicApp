@@ -2,11 +2,7 @@ import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE, SONGS_SKELETON_MIN_MS} from './consta
 import {
   canLoadMoreSongs,
   selectSortedArtists,
-  withArtistSortField,
-  withFlippedArtistSort,
   hasMoreSongs,
-  withFlippedSongSort,
-  withSongSortField,
   nextSongsOffset,
   putPageAt,
   remainingSkeletonMs,
@@ -129,37 +125,6 @@ describe('selectSortedSongs', () => {
   });
 });
 
-describe('withSongSortField', () => {
-  it('starts a newly picked field ascending', () => {
-    const current = {field: 'title', isAscending: false} as const;
-
-    expect(withSongSortField(current, 'artist')).toEqual({field: 'artist', isAscending: true});
-  });
-
-  // picking the field that is already active is not a direction change
-  it('keeps the current sort when the same field is picked', () => {
-    const current = {field: 'title', isAscending: false} as const;
-
-    expect(withSongSortField(current, 'title')).toBe(current);
-  });
-});
-
-describe('withFlippedSongSort', () => {
-  it('flips ascending to descending', () => {
-    expect(withFlippedSongSort({field: 'year', isAscending: true})).toEqual({
-      field: 'year',
-      isAscending: false,
-    });
-  });
-
-  it('flips back', () => {
-    expect(withFlippedSongSort({field: 'year', isAscending: false})).toEqual({
-      field: 'year',
-      isAscending: true,
-    });
-  });
-});
-
 const artist = (
   id: string,
   name: string,
@@ -206,29 +171,6 @@ describe('selectSortedArtists', () => {
     selectSortedArtists(input, {field: 'name', isAscending: true});
 
     expect(input).toEqual(artists);
-  });
-});
-
-describe('withArtistSortField', () => {
-  it('keeps the direction when the field is unchanged', () => {
-    const current = {field: 'followers', isAscending: false} as const;
-
-    expect(withArtistSortField(current, 'followers')).toBe(current);
-  });
-
-  it('resets to ascending on a new field', () => {
-    const current = {field: 'followers', isAscending: false} as const;
-
-    expect(withArtistSortField(current, 'name')).toEqual({field: 'name', isAscending: true});
-  });
-});
-
-describe('withFlippedArtistSort', () => {
-  it('flips the direction and keeps the field', () => {
-    expect(withFlippedArtistSort({field: 'songs', isAscending: true})).toEqual({
-      field: 'songs',
-      isAscending: false,
-    });
   });
 });
 

@@ -2,12 +2,11 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import type {Track} from '../../../domain/types';
 import {useGetTrendingTracksPageQuery} from '../../../services/api/tracks';
 import {uniqueById} from '../../../shared/lib/collections';
+import {withFlippedSort, withSortField} from '../../../shared/lib/sort';
 import {SONGS_PAGE_SIZE} from '../models/constants';
 import {
   canLoadMoreSongs,
   hasMoreSongs,
-  withFlippedSongSort,
-  withSongSortField,
   nextSongsOffset,
   putPageAt,
   remainingSkeletonMs,
@@ -97,11 +96,11 @@ export const useSongsViewModel = (): SongsViewModel => {
   }, [isFetching, offset]);
 
   const setSortField = useCallback((field: SongSortField) => {
-    setSort(current => withSongSortField(current, field));
+    setSort(current => withSortField(current, field));
   }, []);
 
   const toggleSortDirection = useCallback(() => {
-    setSort(withFlippedSongSort);
+    setSort(withFlippedSort);
   }, []);
 
   return {

@@ -1,5 +1,6 @@
 import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE, SONGS_SKELETON_MIN_MS} from './constants';
 import type {Artist, Track} from '../../../domain/types';
+import {sortBy} from '../../../shared/lib/sort';
 import type {
   ArtistSort,
   ArtistSortField,
@@ -29,18 +30,7 @@ const compareByField = (a: Track, b: Track, field: SongSortField): number => {
 };
 
 export const selectSortedSongs = (tracks: Track[], sort: SongSort): Track[] =>
-  [...tracks].sort((a, b) => {
-    const result = compareByField(a, b, sort.field);
-    return sort.isAscending ? result : -result;
-  });
-
-export const withSongSortField = (current: SongSort, field: SongSortField): SongSort =>
-  current.field === field ? current : {field, isAscending: true};
-
-export const withFlippedSongSort = (current: SongSort): SongSort => ({
-  ...current,
-  isAscending: !current.isAscending,
-});
+  sortBy(tracks, sort, compareByField);
 
 const compareArtistsByField = (a: Artist, b: Artist, field: ArtistSortField): number => {
   switch (field) {
@@ -54,18 +44,7 @@ const compareArtistsByField = (a: Artist, b: Artist, field: ArtistSortField): nu
 };
 
 export const selectSortedArtists = (artists: Artist[], sort: ArtistSort): Artist[] =>
-  [...artists].sort((a, b) => {
-    const result = compareArtistsByField(a, b, sort.field);
-    return sort.isAscending ? result : -result;
-  });
-
-export const withArtistSortField = (current: ArtistSort, field: ArtistSortField): ArtistSort =>
-  current.field === field ? current : {field, isAscending: true};
-
-export const withFlippedArtistSort = (current: ArtistSort): ArtistSort => ({
-  ...current,
-  isAscending: !current.isAscending,
-});
+  sortBy(artists, sort, compareArtistsByField);
 
 export const hasMoreSongs = (offset: number): boolean => offset < SONGS_MAX_OFFSET;
 
