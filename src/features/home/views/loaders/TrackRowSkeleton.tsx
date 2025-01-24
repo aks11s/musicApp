@@ -19,8 +19,8 @@ const TrackRowSkeleton = (): React.JSX.Element => {
         radius={theme.radii.md}
       />
       <View style={styles.texts}>
-        <Skeleton width={148} height={12} />
-        <Skeleton width={96} height={10} style={styles.subtitle} />
+        <Skeleton width={148} height={14} />
+        <Skeleton width={112} height={11} style={styles.subtitle} />
       </View>
     </View>
   );
@@ -39,7 +39,7 @@ const stylesheet = createStyleSheet(theme => ({
     flexDirection: 'row',
     alignItems: 'center',
     height: TRACK_ROW_HEIGHT,
-    gap: theme.spacing.md + 1,
+    gap: theme.spacing.lg,
     paddingHorizontal: theme.spacing.sm,
   },
   texts: {

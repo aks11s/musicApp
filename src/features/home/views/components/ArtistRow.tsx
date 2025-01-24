@@ -7,7 +7,7 @@ import {
   ARTIST_ROW_HEIGHT,
 } from '../../models/constants';
 
-const MENU_ICON_SIZE = 17;
+const MENU_ICON_SIZE = 20;
 
 type ArtistRowProps = {
   name: string;
@@ -53,7 +53,7 @@ const stylesheet = createStyleSheet(theme => ({
     flexDirection: 'row',
     alignItems: 'center',
     height: ARTIST_ROW_HEIGHT,
-    gap: theme.spacing.md + 2,
+    gap: theme.spacing.lg,
     paddingHorizontal: theme.spacing.sm,
   },
   avatar: {
@@ -64,16 +64,16 @@ const stylesheet = createStyleSheet(theme => ({
   },
   texts: {
     flex: 1,
-    gap: 2,
+    gap: theme.spacing.sm,
   },
   name: {
     fontFamily: theme.typography.families.semibold,
-    fontSize: theme.typography.sizes.row,
+    fontSize: theme.typography.sizes.title,
     color: theme.colors.text,
   },
   stats: {
     fontFamily: theme.typography.families.regular,
-    fontSize: theme.typography.sizes.small,
+    fontSize: theme.typography.sizes.body,
     color: theme.colors.textMuted,
   },
   menu: {

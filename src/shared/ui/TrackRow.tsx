@@ -3,11 +3,11 @@ import {Image, Text, TouchableOpacity, View} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const ROW_HEIGHT = 70;
-const ARTWORK_SIZE = 52;
-const PLAY_SIZE = 34;
-const PLAY_ICON_SIZE = 14;
-const MENU_ICON_SIZE = 17;
+const ROW_HEIGHT = 88;
+const ARTWORK_SIZE = 72;
+const PLAY_SIZE = 30;
+const PLAY_ICON_SIZE = 15;
+const MENU_ICON_SIZE = 20;
 
 type TrackRowProps = {
   title: string;
@@ -48,7 +48,7 @@ export const TrackRow = React.memo(({
         </View>
 
         <Play style={styles.play} onPress={onPlay}>
-          <Ionicons name="play" size={PLAY_ICON_SIZE} color={theme.colors.background} />
+          <Ionicons name="play" size={PLAY_ICON_SIZE} color={theme.colors.background} style={styles.playIcon}/>
         </Play>
 
         <Menu style={styles.menu} onPress={onMenu}>
@@ -70,7 +70,7 @@ const stylesheet = createStyleSheet(theme => ({
     flexDirection: 'row',
     alignItems: 'center',
     height: ROW_HEIGHT,
-    gap: theme.spacing.md + 1,
+    gap: theme.spacing.lg,
     paddingHorizontal: theme.spacing.sm,
   },
   artwork: {
@@ -81,15 +81,16 @@ const stylesheet = createStyleSheet(theme => ({
   },
   texts: {
     flex: 1,
+    gap: theme.spacing.xs + 2,
   },
   title: {
     fontFamily: theme.typography.families.semibold,
-    fontSize: theme.typography.sizes.row,
+    fontSize: theme.typography.sizes.title,
     color: theme.colors.text,
   },
   subtitle: {
     fontFamily: theme.typography.families.regular,
-    fontSize: theme.typography.sizes.small,
+    fontSize: theme.typography.sizes.body,
     color: theme.colors.textMuted,
   },
   play: {
@@ -100,6 +101,7 @@ const stylesheet = createStyleSheet(theme => ({
     justifyContent: 'center',
     backgroundColor: theme.colors.accent,
   },
+  playIcon: {marginLeft: 2},
   menu: {
     width: 24,
     alignItems: 'center',

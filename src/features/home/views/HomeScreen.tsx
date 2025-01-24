@@ -4,6 +4,7 @@ import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import {useHomeViewModel} from '../viewmodels/useHomeViewModel';
 import {HomeHeader} from './components/HomeHeader';
 import {SegmentBar} from './components/SegmentBar';
+import {ArtistsTab} from './segments/ArtistsTab';
 import {SongsTab} from './segments/SongsTab';
 import {SuggestedTab} from './segments/SuggestedTab';
 
@@ -19,6 +20,7 @@ export const HomeScreen = (): React.JSX.Element => {
 
       {activeSegment === 'Suggested' ? <SuggestedTab /> : null}
       {activeSegment === 'Songs' ? <SongsTab /> : null}
+      {activeSegment === 'Artists' ? <ArtistsTab /> : null}
     </SafeAreaView>
   );
 };
