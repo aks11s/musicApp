@@ -13,8 +13,11 @@ const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryE
   return rawBaseQuery(args, api, extraOptions);
 };
 
+const UNUSED_DATA_TTL_SECONDS = 10 * 60;
+
 export const baseApi = createApi({
   reducerPath: 'baseApi',
   baseQuery: dynamicBaseQuery,
+  keepUnusedDataFor: UNUSED_DATA_TTL_SECONDS,
   endpoints: () => ({}),
 });

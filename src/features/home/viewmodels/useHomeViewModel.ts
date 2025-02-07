@@ -1,13 +1,24 @@
-import {useState} from 'react';
+import {useCallback, useState} from 'react';
 import type {HomeSegment} from '../models/types';
 
 export type HomeViewModel = {
   activeSegment: HomeSegment;
+  visitedSegments: ReadonlySet<HomeSegment>;
   setActiveSegment: (segment: HomeSegment) => void;
 };
 
-export const useHomeViewModel = (): HomeViewModel => {
-  const [activeSegment, setActiveSegment] = useState<HomeSegment>('Suggested');
+const INITIAL_SEGMENT: HomeSegment = 'Suggested';
 
-  return {activeSegment, setActiveSegment};
+export const useHomeViewModel = (): HomeViewModel => {
+  const [activeSegment, setActive] = useState<HomeSegment>(INITIAL_SEGMENT);
+  const [visitedSegments, setVisited] = useState<ReadonlySet<HomeSegment>>(
+    () => new Set([INITIAL_SEGMENT]),
+  );
+
+  const setActiveSegment = useCallback((segment: HomeSegment) => {
+    setActive(segment);
+    setVisited(current => new Set(current).add(segment));
+  }, []);
+
+  return {activeSegment, visitedSegments, setActiveSegment};
 };
