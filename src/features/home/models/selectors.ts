@@ -1,7 +1,9 @@
 import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE} from './constants';
-import type {Artist, Track} from '../../../domain/types';
+import type {Album, Artist, Track} from '../../../domain/types';
 import {sortBy} from '../../../shared/lib/sort';
 import type {
+  AlbumSort,
+  AlbumSortField,
   ArtistSort,
   ArtistSortField,
   SongSort,
@@ -45,6 +47,22 @@ const compareArtistsByField = (a: Artist, b: Artist, field: ArtistSortField): nu
 
 export const selectSortedArtists = (artists: Artist[], sort: ArtistSort): Artist[] =>
   sortBy(artists, sort, compareArtistsByField);
+
+const compareAlbumsByField = (a: Album, b: Album, field: AlbumSortField): number => {
+  switch (field) {
+    case 'title':
+      return titleCollator.compare(a.title, b.title);
+    case 'artist':
+      return titleCollator.compare(a.artist, b.artist);
+    case 'year':
+      return a.releaseDate.localeCompare(b.releaseDate);
+    case 'songs':
+      return a.trackCount - b.trackCount;
+  }
+};
+
+export const selectSortedAlbums = (albums: Album[], sort: AlbumSort): Album[] =>
+  sortBy(albums, sort, compareAlbumsByField);
 
 export const hasMoreSongs = (offset: number): boolean => offset < SONGS_MAX_OFFSET;
 

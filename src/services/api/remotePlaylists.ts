@@ -1,17 +1,23 @@
 import {z} from 'zod';
 import {
+  mapAlbumDtoToAlbum,
   mapPlaylistDtoToRemotePlaylist,
   mapTrackDtoToTrack,
 } from '../../domain/mapper';
 import {
+  albumDtoSchema,
   playlistDtoSchema,
   trackDtoSchema,
 } from '../../domain/schema';
-import type {RemotePlaylist, Track} from '../../domain/types';
+import type {Album, RemotePlaylist, Track} from '../../domain/types';
 import {baseApi} from './baseApi';
 
 const playlistListResponseSchema = z.object({
   data: z.array(playlistDtoSchema),
+});
+
+const albumListResponseSchema = z.object({
+  data: z.array(albumDtoSchema),
 });
 
 const trackListResponseSchema = z.object({
@@ -25,6 +31,13 @@ export const remotePlaylistsApi = baseApi.injectEndpoints({
       transformResponse: (response: unknown): RemotePlaylist[] => {
         const {data} = playlistListResponseSchema.parse(response);
         return data.map(mapPlaylistDtoToRemotePlaylist);
+      },
+    }),
+    getTrendingAlbums: build.query<Album[], number>({
+      query: limit => `/playlists/trending?type=album&limit=${limit}`,
+      transformResponse: (response: unknown): Album[] => {
+        const {data} = albumListResponseSchema.parse(response);
+        return data.map(mapAlbumDtoToAlbum);
       },
     }),
     getPlaylist: build.query<RemotePlaylist, string>({
@@ -56,6 +69,7 @@ export const remotePlaylistsApi = baseApi.injectEndpoints({
 
 export const {
   useGetTrendingPlaylistsQuery,
+  useGetTrendingAlbumsQuery,
   useGetPlaylistQuery,
   useGetPlaylistTracksQuery,
   useSearchPlaylistsQuery,

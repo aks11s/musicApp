@@ -1,13 +1,14 @@
 import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE} from './constants';
 import {
   canLoadMoreSongs,
+  selectSortedAlbums,
   selectSortedArtists,
   hasMoreSongs,
   nextSongsOffset,
   putPageAt,
   selectSortedSongs,
 } from './selectors';
-import type {Artist, Track} from '../../../domain/types';
+import type {Album, Artist, Track} from '../../../domain/types';
 
 const track = (
   id: string,
@@ -170,6 +171,46 @@ describe('selectSortedArtists', () => {
     selectSortedArtists(input, {field: 'name', isAscending: true});
 
     expect(input).toEqual(artists);
+  });
+});
+
+const album = (
+  id: string,
+  title: string,
+  artistName: string,
+  releaseDate: string,
+  trackCount: number,
+): Album => ({id, title, artist: artistName, artworkUrl: '', releaseDate, trackCount});
+
+const albums = [
+  album('1', 'duende', 'Lott', '2026-09-19T13:41:05Z', 4),
+  album('2', 'Aurora', 'The Broken Star', '2026-09-18T16:37:22Z', 12),
+  album('3', 'P4T13NT Z3R0', 'ChobNet', '2026-09-22T20:54:32Z', 6),
+];
+
+describe('selectSortedAlbums', () => {
+  it('sorts by title ignoring case', () => {
+    const sorted = selectSortedAlbums(albums, {field: 'title', isAscending: true});
+
+    expect(sorted.map(a => a.title)).toEqual(['Aurora', 'duende', 'P4T13NT Z3R0']);
+  });
+
+  it('sorts by artist', () => {
+    const sorted = selectSortedAlbums(albums, {field: 'artist', isAscending: true});
+
+    expect(sorted.map(a => a.artist)).toEqual(['ChobNet', 'Lott', 'The Broken Star']);
+  });
+
+  it('sorts newest first by release date', () => {
+    const sorted = selectSortedAlbums(albums, {field: 'year', isAscending: false});
+
+    expect(sorted.map(a => a.id)).toEqual(['3', '1', '2']);
+  });
+
+  it('sorts by song count', () => {
+    const sorted = selectSortedAlbums(albums, {field: 'songs', isAscending: true});
+
+    expect(sorted.map(a => a.trackCount)).toEqual([4, 6, 12]);
   });
 });
 

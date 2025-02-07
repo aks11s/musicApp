@@ -23,6 +23,17 @@ export const ARTIST_SORT_LABELS = {
   songs: 'Songs',
 } as const;
 
+export const ALBUMS_LIMIT = 100;
+
+export const ALBUM_SORT_FIELDS = ['title', 'artist', 'year', 'songs'] as const;
+
+export const ALBUM_SORT_LABELS = {
+  title: 'Title',
+  artist: 'Artist',
+  year: 'Year',
+  songs: 'Songs',
+} as const;
+
 export const SONGS_PAGE_SIZE = 50;
 export const SONGS_MAX_OFFSET = 200;
 export const SKELETON_COUNT = 4;
