@@ -51,6 +51,10 @@ export const ARTIST_ROW_HEIGHT = 88;
 export const ARTIST_ROW_AVATAR_SIZE = 72;
 export const ARTISTS_SKELETON_COUNT = 8;
 
+export const ALBUM_GRID_PADDING = 20;
+export const ALBUM_GRID_GAP = 10;
+export const ALBUMS_SKELETON_COUNT = 4;
+
 export const RECENTLY_PLAYED_LIMIT = 20;
 export const TRACK_CARD_SIZE = 128;
 export const RECENTLY_PLAYED_CARD_SIZE = 112;
