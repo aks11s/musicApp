@@ -1,33 +1,97 @@
-import {sortBy, withFlippedSort, withSortField} from './sort';
+import {
+  byIsoDate,
+  byNumber,
+  byText,
+  sortBy,
+  withFlippedSort,
+  withSortField,
+} from './sort';
 
-const compare = (a: number, b: number): number => a - b;
+type Row = {name: string; count: number; date: string};
+
+const row = (name: string, count: number, date: string): Row => ({
+  name,
+  count,
+  date,
+});
+
+const rows = [
+  row('banana', 3, '2024-05-01T00:00:00Z'),
+  row('Apple', 10, '2023-01-15T00:00:00Z'),
+  row('cherry', 1, '2024-11-20T00:00:00Z'),
+];
+
+const comparators = {
+  name: byText((r: Row) => r.name),
+  count: byNumber((r: Row) => r.count),
+  date: byIsoDate((r: Row) => r.date),
+};
 
 describe('sortBy', () => {
-  it('sorts ascending', () => {
-    expect(sortBy([3, 1, 2], {field: 'n', isAscending: true}, compare)).toEqual([1, 2, 3]);
+  it('uses the comparator of the active field', () => {
+    const sorted = sortBy(
+      rows,
+      {field: 'count', isAscending: true},
+      comparators,
+    );
+
+    expect(sorted.map(r => r.count)).toEqual([1, 3, 10]);
   });
 
-  it('sorts descending', () => {
-    expect(sortBy([3, 1, 2], {field: 'n', isAscending: false}, compare)).toEqual([3, 2, 1]);
-  });
+  it('reverses the order when descending', () => {
+    const sorted = sortBy(
+      rows,
+      {field: 'count', isAscending: false},
+      comparators,
+    );
 
-  it('passes the active field to the comparator', () => {
-    const fields: string[] = [];
-
-    sortBy([1, 2], {field: 'year', isAscending: true}, (a, b, field) => {
-      fields.push(field);
-      return a - b;
-    });
-
-    expect(new Set(fields)).toEqual(new Set(['year']));
+    expect(sorted.map(r => r.count)).toEqual([10, 3, 1]);
   });
 
   it('does not mutate the input', () => {
-    const input = [3, 1, 2];
+    const input = [...rows];
 
-    sortBy(input, {field: 'n', isAscending: true}, compare);
+    sortBy(input, {field: 'name', isAscending: true}, comparators);
 
-    expect(input).toEqual([3, 1, 2]);
+    expect(input).toEqual(rows);
+  });
+});
+
+describe('byText', () => {
+  it('ignores case', () => {
+    const sorted = sortBy(
+      rows,
+      {field: 'name', isAscending: true},
+      comparators,
+    );
+
+    expect(sorted.map(r => r.name)).toEqual(['Apple', 'banana', 'cherry']);
+  });
+
+  it('orders numbers inside text the human way', () => {
+    const compare = byText((s: string) => s);
+
+    expect(['Mix 10', 'Mix 2'].sort(compare)).toEqual(['Mix 2', 'Mix 10']);
+  });
+});
+
+describe('byIsoDate', () => {
+  it('orders ISO dates chronologically', () => {
+    const sorted = sortBy(
+      rows,
+      {field: 'date', isAscending: true},
+      comparators,
+    );
+
+    expect(sorted.map(r => r.date.slice(0, 7))).toEqual([
+      '2023-01',
+      '2024-05',
+      '2024-11',
+    ]);
+  });
+
+  it('treats equal dates as equal', () => {
+    expect(comparators.date(rows[0], rows[0])).toBe(0);
   });
 });
 
@@ -35,7 +99,10 @@ describe('withSortField', () => {
   it('starts a newly picked field ascending', () => {
     const current = {field: 'title', isAscending: false};
 
-    expect(withSortField(current, 'artist')).toEqual({field: 'artist', isAscending: true});
+    expect(withSortField(current, 'artist')).toEqual({
+      field: 'artist',
+      isAscending: true,
+    });
   });
 
   // picking the field that is already active is not a direction change

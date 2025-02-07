@@ -1,6 +1,12 @@
 import {SONGS_MAX_OFFSET, SONGS_PAGE_SIZE} from './constants';
 import type {Album, Artist, Track} from '../../../domain/types';
-import {sortBy} from '../../../shared/lib/sort';
+import {
+  byIsoDate,
+  byNumber,
+  byText,
+  type Compare,
+  sortBy,
+} from '../../../shared/lib/sort';
 import type {
   AlbumSort,
   AlbumSortField,
@@ -14,55 +20,34 @@ import type {
 export const selectMostPopularArtists = (artists: Artist[], limit: number): Artist[] =>
   [...artists].sort((a, b) => b.followerCount - a.followerCount).slice(0, limit);
 
-// localeCompare which is 17 x slower over a few hundred tracks
-const titleCollator = new Intl.Collator(undefined, {sensitivity: 'base', numeric: true});
-
-// ISO dates compare correctly as plain text, so no Date is parsed per comparison
-const compareByField = (a: Track, b: Track, field: SongSortField): number => {
-  switch (field) {
-    case 'title':
-      return titleCollator.compare(a.title, b.title);
-    case 'artist':
-      return titleCollator.compare(a.artist, b.artist);
-    case 'duration':
-      return a.durationSeconds - b.durationSeconds;
-    case 'year':
-      return a.releaseDate.localeCompare(b.releaseDate);
-  }
+const songComparators: Record<SongSortField, Compare<Track>> = {
+  title: byText(track => track.title),
+  artist: byText(track => track.artist),
+  duration: byNumber(track => track.durationSeconds),
+  year: byIsoDate(track => track.releaseDate),
 };
 
 export const selectSortedSongs = (tracks: Track[], sort: SongSort): Track[] =>
-  sortBy(tracks, sort, compareByField);
+  sortBy(tracks, sort, songComparators);
 
-const compareArtistsByField = (a: Artist, b: Artist, field: ArtistSortField): number => {
-  switch (field) {
-    case 'name':
-      return titleCollator.compare(a.name, b.name);
-    case 'followers':
-      return a.followerCount - b.followerCount;
-    case 'songs':
-      return a.trackCount - b.trackCount;
-  }
+const artistComparators: Record<ArtistSortField, Compare<Artist>> = {
+  name: byText(artist => artist.name),
+  followers: byNumber(artist => artist.followerCount),
+  songs: byNumber(artist => artist.trackCount),
 };
 
 export const selectSortedArtists = (artists: Artist[], sort: ArtistSort): Artist[] =>
-  sortBy(artists, sort, compareArtistsByField);
+  sortBy(artists, sort, artistComparators);
 
-const compareAlbumsByField = (a: Album, b: Album, field: AlbumSortField): number => {
-  switch (field) {
-    case 'title':
-      return titleCollator.compare(a.title, b.title);
-    case 'artist':
-      return titleCollator.compare(a.artist, b.artist);
-    case 'year':
-      return a.releaseDate.localeCompare(b.releaseDate);
-    case 'songs':
-      return a.trackCount - b.trackCount;
-  }
+const albumComparators: Record<AlbumSortField, Compare<Album>> = {
+  title: byText(album => album.title),
+  artist: byText(album => album.artist),
+  year: byIsoDate(album => album.releaseDate),
+  songs: byNumber(album => album.trackCount),
 };
 
 export const selectSortedAlbums = (albums: Album[], sort: AlbumSort): Album[] =>
-  sortBy(albums, sort, compareAlbumsByField);
+  sortBy(albums, sort, albumComparators);
 
 export const hasMoreSongs = (offset: number): boolean => offset < SONGS_MAX_OFFSET;
 
