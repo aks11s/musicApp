@@ -3,7 +3,7 @@ import {View} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
-import {MiniPlayerBar} from '../features/player/views/MiniPlayerBar';
+import {MiniPlayerBar} from '../player/views/MiniPlayerBar';
 import {TabNavigator} from './TabNavigator';
 import type {RootStackParamList} from './types';
 import {useTabBarHeight} from './useTabBarHeight';
