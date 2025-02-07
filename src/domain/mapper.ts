@@ -1,5 +1,5 @@
-import type {PlaylistDto, TrackDto, UserDto} from './schema';
-import type {Artist, RemotePlaylist, Track} from './types';
+import type {AlbumDto, PlaylistDto, TrackDto, UserDto} from './schema';
+import type {Album, Artist, RemotePlaylist, Track} from './types';
 
 export const mapTrackDtoToTrack = (dto: TrackDto): Track => ({
   id: dto.id,
@@ -26,4 +26,13 @@ export const mapPlaylistDtoToRemotePlaylist = (dto: PlaylistDto): RemotePlaylist
   curatorName: dto.user.name,
   artworkUrl: dto.artwork?.['480x480'] ?? dto.artwork?.['150x150'] ?? '',
   trackCount: dto.track_count,
+});
+
+export const mapAlbumDtoToAlbum = (dto: AlbumDto): Album => ({
+  id: dto.id,
+  title: dto.playlist_name,
+  artist: dto.user.name,
+  artworkUrl: dto.artwork?.['480x480'] ?? dto.artwork?.['150x150'] ?? '',
+  trackCount: dto.track_count,
+  releaseDate: dto.release_date ?? '',
 });

@@ -17,6 +17,15 @@ export type Artist = {
   trackCount: number;
 };
 
+export type Album = {
+  id: string;
+  title: string;
+  artist: string;
+  artworkUrl: string;
+  trackCount: number;
+  releaseDate: string;
+};
+
 export type RemotePlaylist = {
   id: string;
   title: string;

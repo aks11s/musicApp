@@ -54,3 +54,9 @@ export const playlistDtoSchema = z.object({
 });
 
 export type PlaylistDto = z.infer<typeof playlistDtoSchema>;
+
+export const albumDtoSchema = playlistDtoSchema.extend({
+  release_date: z.string().nullish(),
+});
+
+export type AlbumDto = z.infer<typeof albumDtoSchema>;

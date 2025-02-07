@@ -1,5 +1,10 @@
-import {playlistDtoSchema, trackDtoSchema, userDtoSchema} from './schema';
-import {mapPlaylistDtoToRemotePlaylist, mapTrackDtoToTrack, mapUserDtoToArtist} from './mapper';
+import {albumDtoSchema, playlistDtoSchema, trackDtoSchema, userDtoSchema} from './schema';
+import {
+  mapAlbumDtoToAlbum,
+  mapPlaylistDtoToRemotePlaylist,
+  mapTrackDtoToTrack,
+  mapUserDtoToArtist,
+} from './mapper';
 
 // recorded shape of a single item from GET /v1/tracks/trending
 const trendingTrackFixture = {
@@ -52,6 +57,25 @@ const playlistFixture = {
     id: 'nP2mK',
     handle: 'novawave',
     name: 'Nova Wave',
+  },
+};
+
+// recorded shape of a single item from GET /v1/playlists/trending?type=album
+const albumFixture = {
+  id: 'QxZNA3B',
+  playlist_name: 'Duende',
+  track_count: 4,
+  release_date: '2026-09-19T13:41:05.067084Z',
+  is_album: true,
+  artwork: {
+    '150x150': 'https://discoveryprovider.audius.co/album/150x150.jpg',
+    '480x480': 'https://discoveryprovider.audius.co/album/480x480.jpg',
+    '1000x1000': 'https://discoveryprovider.audius.co/album/1000x1000.jpg',
+  },
+  user: {
+    id: 'aL0tt',
+    handle: 'lott',
+    name: 'Lott',
   },
 };
 
@@ -155,5 +179,37 @@ describe('mapPlaylistDtoToRemotePlaylist', () => {
     const dto = playlistDtoSchema.parse({...playlistFixture, artwork: null});
 
     expect(mapPlaylistDtoToRemotePlaylist(dto).artworkUrl).toBe('');
+  });
+});
+
+describe('albumDtoSchema', () => {
+  it('parses a recorded album response', () => {
+    expect(() => albumDtoSchema.parse(albumFixture)).not.toThrow();
+  });
+
+  // 2 of the first 100 trending albums come back with artwork: null
+  it('accepts an album with no artwork', () => {
+    expect(() => albumDtoSchema.parse({...albumFixture, artwork: null})).not.toThrow();
+  });
+});
+
+describe('mapAlbumDtoToAlbum', () => {
+  it('maps a DTO to the domain Album shape', () => {
+    const dto = albumDtoSchema.parse(albumFixture);
+
+    expect(mapAlbumDtoToAlbum(dto)).toEqual({
+      id: 'QxZNA3B',
+      title: 'Duende',
+      artist: 'Lott',
+      artworkUrl: 'https://discoveryprovider.audius.co/album/480x480.jpg',
+      trackCount: 4,
+      releaseDate: '2026-09-19T13:41:05.067084Z',
+    });
+  });
+
+  it('falls back to empty strings for missing artwork and release date', () => {
+    const dto = albumDtoSchema.parse({...albumFixture, artwork: null, release_date: null});
+
+    expect(mapAlbumDtoToAlbum(dto)).toMatchObject({artworkUrl: '', releaseDate: ''});
   });
 });
