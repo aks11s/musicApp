@@ -2,6 +2,7 @@ import React from 'react';
 import {Image, Text, TouchableOpacity, View} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {toImageSource} from '../lib/imageSource';
 
 const ROW_HEIGHT = 88;
 const ARTWORK_SIZE = 72;
@@ -27,8 +28,7 @@ export const TrackRow = React.memo(({
   onMenu,
 }: TrackRowProps): React.JSX.Element => {
     const {styles, theme} = useStyles(stylesheet);
-    // a fresh uri object on every render remounts the image
-    const source = React.useMemo(() => ({uri: artworkUrl}), [artworkUrl]);
+    const source = React.useMemo(() => toImageSource(artworkUrl), [artworkUrl]);
 
     const Row = onPress ? TouchableOpacity : View;
     const Play = onPlay ? TouchableOpacity : View;

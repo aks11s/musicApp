@@ -2,6 +2,7 @@ import React from 'react';
 import {Image, Text, View} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {toImageSource} from '../../../../shared/lib/imageSource';
 import {
   ARTIST_ROW_AVATAR_SIZE,
   ARTIST_ROW_HEIGHT,
@@ -18,7 +19,7 @@ type ArtistRowProps = {
 export const ArtistRow = React.memo(
   ({name, stats, avatarUrl}: ArtistRowProps): React.JSX.Element => {
     const {styles, theme} = useStyles(stylesheet);
-    const source = React.useMemo(() => ({uri: avatarUrl}), [avatarUrl]);
+    const source = React.useMemo(() => toImageSource(avatarUrl), [avatarUrl]);
 
     return (
       <View style={styles.row}>

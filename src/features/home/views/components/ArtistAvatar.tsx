@@ -2,6 +2,7 @@ import React from 'react';
 import {Image, Text, View} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import type {Artist} from '../../../../domain/types';
+import {toImageSource} from '../../../../shared/lib/imageSource';
 
 type ArtistAvatarProps = {artist: Artist};
 
@@ -10,7 +11,7 @@ export const ArtistAvatar = ({artist}: ArtistAvatarProps): React.JSX.Element => 
 
   return (
     <View style={styles.artistCard}>
-      <Image source={{uri: artist.avatarUrl}} style={styles.artistAvatar} />
+      <Image source={toImageSource(artist.avatarUrl)} style={styles.artistAvatar} />
       <Text style={styles.artistName} numberOfLines={1}>
         {artist.name}
       </Text>
@@ -28,6 +29,7 @@ const stylesheet = createStyleSheet(theme => ({
     width: 96,
     height: 96,
     borderRadius: 48,
+    backgroundColor: theme.colors.surface,
   },
   artistName: {
     fontFamily: theme.typography.families.semibold,

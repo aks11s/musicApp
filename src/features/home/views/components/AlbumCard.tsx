@@ -2,6 +2,7 @@ import React from 'react';
 import {Image, Text, View} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {toImageSource} from '../../../../shared/lib/imageSource';
 
 const MENU_ICON_SIZE = 20;
 
@@ -14,7 +15,7 @@ type AlbumCardProps = {
 
 export const AlbumCard = React.memo(({title, subtitle, songCount, artworkUrl}: AlbumCardProps): React.JSX.Element => {
     const {styles, theme} = useStyles(stylesheet);
-    const source = React.useMemo(() => ({uri: artworkUrl}), [artworkUrl]);
+    const source = React.useMemo(() => toImageSource(artworkUrl), [artworkUrl]);
 
     return (
       <View style={styles.card}>

@@ -2,6 +2,7 @@ import React from 'react';
 import {Image, Text, View} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import type {Track} from '../../../../domain/types';
+import {toImageSource} from '../../../../shared/lib/imageSource';
 
 type TrackCardProps = {
   track: Track;
@@ -13,7 +14,7 @@ export const TrackCard = React.memo(({track, size}: TrackCardProps): React.JSX.E
 
   return (
     <View style={styles.card(size)}>
-      <Image source={{uri: track.artworkUrl}} style={styles.artwork(size)} />
+      <Image source={toImageSource(track.artworkUrl)} style={styles.artwork(size)} />
       <Text style={styles.title} numberOfLines={1}>
         {track.title}
       </Text>
