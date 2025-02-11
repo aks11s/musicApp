@@ -1,6 +1,7 @@
 import {useCallback} from 'react';
 import {useAppDispatch, useAppSelector} from '../../app/hooks';
 import {pause, play} from '../../services/player/playerService';
+import {toErrorMessage} from '../../shared/lib/errors';
 import {cleared, playbackFailed, selectCurrentTrack} from '../store/playerSlice';
 
 export type MiniPlayerTrack = {
@@ -27,7 +28,7 @@ export const useMiniPlayerViewModel = (): MiniPlayerViewModel => {
     try {
       await (isPlaying ? pause() : play());
     } catch (error) {
-      dispatch(playbackFailed(error instanceof Error ? error.message : String(error)));
+      dispatch(playbackFailed(toErrorMessage(error)));
     }
   }, [dispatch, isPlaying]);
 
