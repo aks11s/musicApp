@@ -1,5 +1,6 @@
-import {useMemo} from 'react';
+import {useCallback, useMemo} from 'react';
 import type {Track} from '../../../../domain/types';
+import {usePlayTracks} from '../../../../player/viewmodels/usePlayTracks';
 import {useMinLoadingTime} from '../../../../shared/hooks/useMinLoadingTime';
 import {useSort} from '../../../../shared/hooks/useSort';
 import {SONGS_SKELETON_MIN_MS} from '../../models/constants';
@@ -20,6 +21,7 @@ export type SongsViewModel = {
   hasMore: boolean;
   loadMore: () => void;
   allowLoadMore: () => void;
+  playSong: (index: number) => void;
 };
 
 export const useSongsViewModel = (): SongsViewModel => {
@@ -32,6 +34,14 @@ export const useSongsViewModel = (): SongsViewModel => {
   const isSkeletonShown = useMinLoadingTime(isFetching, SONGS_SKELETON_MIN_MS);
 
   const songs = useMemo(() => selectSortedSongs(loaded, sort), [loaded, sort]);
+
+  const playTracks = usePlayTracks();
+  const playSong = useCallback(
+    (index: number) => {
+      playTracks(loaded, index);
+    },
+    [playTracks, loaded],
+  );
 
   return {
     songs,
@@ -46,5 +56,6 @@ export const useSongsViewModel = (): SongsViewModel => {
     hasMore,
     loadMore,
     allowLoadMore,
+    playSong,
   };
 };
