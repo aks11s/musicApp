@@ -1,4 +1,4 @@
-import TrackPlayer, {type Track as PlayerTrack} from 'react-native-track-player';
+import TrackPlayer, {Capability, type Track as PlayerTrack} from 'react-native-track-player';
 import type {Track} from '../../domain/types';
 import {getTrackStreamUrl} from '../api/tracks';
 
@@ -8,11 +8,15 @@ const initPlayer = async (): Promise<void> => {
   try {
     await TrackPlayer.setupPlayer();
   } catch (error) {
-    // the native player outlives a JS reload, so a second setup is expected in dev
     if ((error as {code?: string}).code !== 'player_already_initialized') {
       throw error;
     }
   }
+
+  await TrackPlayer.updateOptions({
+    capabilities: [Capability.Play, Capability.Pause],
+    compactCapabilities: [Capability.Play, Capability.Pause],
+  });
 };
 
 export const setupPlayer = (): Promise<void> => {
@@ -33,6 +37,7 @@ const toPlayerTrack = async (track: Track): Promise<PlayerTrack> => ({
   artwork: track.artworkUrl || undefined,
   duration: track.durationSeconds,
 });
+
 
 export const playQueue = async (tracks: Track[], startIndex: number): Promise<void> => {
   const queue = await Promise.all(tracks.map(toPlayerTrack));
