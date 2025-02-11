@@ -70,3 +70,7 @@ export const playQueue = async (tracks: Track[], startIndex: number): Promise<vo
     throw error;
   }
 };
+
+export const play = (): Promise<void> => TrackPlayer.play();
+
+export const pause = (): Promise<void> => TrackPlayer.pause();

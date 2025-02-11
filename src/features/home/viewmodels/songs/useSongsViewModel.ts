@@ -38,9 +38,9 @@ export const useSongsViewModel = (): SongsViewModel => {
   const playTracks = usePlayTracks();
   const playSong = useCallback(
     (index: number) => {
-      playTracks(loaded, index);
+      playTracks(songs, index);
     },
-    [playTracks, loaded],
+    [playTracks, songs],
   );
 
   return {

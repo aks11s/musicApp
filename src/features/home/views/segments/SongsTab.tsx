@@ -33,14 +33,6 @@ const getItemLayout = (_: ArrayLike<Track> | null | undefined, index: number) =>
   index,
 });
 
-const renderItem = ({item}: {item: Track}): React.JSX.Element => (
-  <TrackRow
-    title={item.title}
-    subtitle={`${item.artist} · ${formatDuration(item.durationSeconds)}`}
-    artworkUrl={item.artworkUrl}
-  />
-);
-
 export const SongsTab = (): React.JSX.Element => {
   const {styles} = useStyles(stylesheet);
 
@@ -57,7 +49,24 @@ export const SongsTab = (): React.JSX.Element => {
     loadMore,
     allowLoadMore,
     hasMore,
+    playSong,
   } = useSongsViewModel();
+
+  const renderItem = useCallback(
+    ({item, index}: {item: Track; index: number}): React.JSX.Element => {
+      const play = () => playSong(index);
+      return (
+        <TrackRow
+          title={item.title}
+          subtitle={`${item.artist} · ${formatDuration(item.durationSeconds)}`}
+          artworkUrl={item.artworkUrl}
+          onPress={play}
+          onPlay={play}
+        />
+      );
+    },
+    [playSong],
+  );
 
   const overscroll = useSharedValue(0);
   const hasFired = useSharedValue(false);
