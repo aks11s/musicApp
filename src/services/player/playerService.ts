@@ -107,3 +107,10 @@ export const onStateChanged = (listener: (state: EngineState) => void): (() => v
   );
   return () => subscription.remove();
 };
+
+export const onActiveTrackChanged = (listener: (index: number | null) => void): (() => void) => {
+  const subscription = TrackPlayer.addEventListener(Event.PlaybackActiveTrackChanged, event =>
+    listener(event.index ?? null),
+  );
+  return () => subscription.remove();
+};
