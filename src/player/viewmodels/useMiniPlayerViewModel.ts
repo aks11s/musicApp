@@ -1,5 +1,7 @@
+import {useCallback} from 'react';
 import {useAppDispatch, useAppSelector} from '../../app/hooks';
-import {cleared, selectCurrentTrack} from '../store/playerSlice';
+import {pause, play} from '../../services/player/playerService';
+import {cleared, playbackFailed, selectCurrentTrack} from '../store/playerSlice';
 
 export type MiniPlayerTrack = {
   id: string;
@@ -12,18 +14,29 @@ export type MiniPlayerViewModel = {
   track: MiniPlayerTrack | null;
   isPlaying: boolean;
   progress: number;
+  togglePlayback: () => void;
   stop: () => void;
 };
 
 export const useMiniPlayerViewModel = (): MiniPlayerViewModel => {
   const dispatch = useAppDispatch();
   const track = useAppSelector(selectCurrentTrack);
+  const isPlaying = useAppSelector(state => state.player.status === 'playing');
+
+  const togglePlayback = useCallback(async () => {
+    try {
+      await (isPlaying ? pause() : play());
+    } catch (error) {
+      dispatch(playbackFailed(error instanceof Error ? error.message : String(error)));
+    }
+  }, [dispatch, isPlaying]);
 
   return {
     track,
-    // TODO: real state and progress once the slice mirrors TrackPlayer events
-    isPlaying: true,
+    isPlaying,
+    // TODO: real progress from useProgress
     progress: 0,
+    togglePlayback,
     // TODO: stop the engine too, not just hide the bar
     stop: () => dispatch(cleared()),
   };

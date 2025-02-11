@@ -7,7 +7,7 @@ import {useMiniPlayerViewModel} from '../viewmodels/useMiniPlayerViewModel';
 
 export const MiniPlayerBar = (): React.JSX.Element | null => {
   const {styles, theme} = useStyles(stylesheet);
-  const {track, isPlaying, progress, stop} = useMiniPlayerViewModel();
+  const {track, isPlaying, progress, togglePlayback, stop} = useMiniPlayerViewModel();
   const artworkUrl = track?.artworkUrl ?? '';
   const artwork = useMemo(() => toImageSource(artworkUrl), [artworkUrl]);
 
@@ -28,7 +28,8 @@ export const MiniPlayerBar = (): React.JSX.Element | null => {
       </View>
       <TouchableOpacity
         style={styles.playButton}
-        accessibilityLabel={isPlaying ? 'Pause' : 'Play'}>
+        accessibilityLabel={isPlaying ? 'Pause' : 'Play'}
+        onPress={togglePlayback}>
         <Ionicons
           name={isPlaying ? 'pause' : 'play'}
           color={theme.colors.background}
