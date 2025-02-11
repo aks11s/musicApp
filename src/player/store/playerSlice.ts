@@ -25,6 +25,11 @@ const playerSlice = createSlice({
       state.currentIndex = action.payload.startIndex;
       state.error = null;
     },
+    activeTrackChanged: (state, action: PayloadAction<number | null>) => {
+      if (action.payload !== null) {
+        state.currentIndex = action.payload;
+      }
+    },
     statusChanged: (state, action: PayloadAction<EngineState>) => {
       state.status = action.payload;
     },
@@ -35,7 +40,8 @@ const playerSlice = createSlice({
   },
 });
 
-export const {queueStarted, statusChanged, playbackFailed, cleared} = playerSlice.actions;
+export const {queueStarted, activeTrackChanged, statusChanged, playbackFailed, cleared} =
+  playerSlice.actions;
 export const playerReducer = playerSlice.reducer;
 
 export const selectCurrentTrack = (state: {player: PlayerState}): Track | null => {

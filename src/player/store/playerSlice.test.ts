@@ -1,5 +1,6 @@
 import type {Track} from '../../domain/types';
 import {
+  activeTrackChanged,
   cleared,
   playbackFailed,
   playerReducer,
@@ -62,6 +63,22 @@ describe('playerSlice', () => {
     const state = playerReducer(failed, queueStarted({tracks, startIndex: 0}));
 
     expect(state.error).toBeNull();
+  });
+
+  it('follows the track the engine moved to', () => {
+    const playing = playerReducer(undefined, queueStarted({tracks, startIndex: 0}));
+    const state = playerReducer(playing, activeTrackChanged(2));
+
+    expect(selectCurrentTrack({player: state})?.id).toBe('c');
+  });
+
+  it('keeps the failed track on screen when the engine reports no active track', () => {
+    const playing = playerReducer(undefined, queueStarted({tracks, startIndex: 1}));
+    const failed = playerReducer(playing, playbackFailed('Network request failed'));
+    const state = playerReducer(failed, activeTrackChanged(null));
+
+    expect(state.currentIndex).toBe(1);
+    expect(state.error).toBe('Network request failed');
   });
 
   it('tracks the engine status', () => {
