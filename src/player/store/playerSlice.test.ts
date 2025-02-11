@@ -1,5 +1,11 @@
 import type {Track} from '../../domain/types';
-import {cleared, playbackFailed, playerReducer, queueStarted} from './playerSlice';
+import {
+  cleared,
+  playbackFailed,
+  playerReducer,
+  queueStarted,
+  selectCurrentTrack,
+} from './playerSlice';
 
 const makeTrack = (id: string): Track => ({
   id,
@@ -62,5 +68,25 @@ describe('playerSlice', () => {
     const state = playerReducer(failed, cleared());
 
     expect(state.error).toBeNull();
+  });
+});
+
+describe('selectCurrentTrack', () => {
+  it('returns null while nothing is queued', () => {
+    const player = playerReducer(undefined, {type: 'init'});
+
+    expect(selectCurrentTrack({player})).toBeNull();
+  });
+
+  it('returns the track at the current index', () => {
+    const player = playerReducer(undefined, queueStarted({tracks, startIndex: 2}));
+
+    expect(selectCurrentTrack({player})?.id).toBe('c');
+  });
+
+  it('returns null when the index points past the queue', () => {
+    const player = playerReducer(undefined, queueStarted({tracks, startIndex: 5}));
+
+    expect(selectCurrentTrack({player})).toBeNull();
   });
 });

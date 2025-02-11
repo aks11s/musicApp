@@ -1,10 +1,11 @@
-import {useState} from 'react';
+import {useAppDispatch, useAppSelector} from '../../app/hooks';
+import {cleared, selectCurrentTrack} from '../store/playerSlice';
 
 export type MiniPlayerTrack = {
   id: string;
   title: string;
   artist: string;
-  gradient: [string, string];
+  artworkUrl: string;
 };
 
 export type MiniPlayerViewModel = {
@@ -14,21 +15,16 @@ export type MiniPlayerViewModel = {
   stop: () => void;
 };
 
-// TODO: replace with real playerSlice state once react-native-track-player is wired up
-const MOCK_TRACK: MiniPlayerTrack = {
-  id: 'track-1',
-  title: 'Starfall',
-  artist: 'Aria Nova',
-  gradient: ['#FF7A59', '#FFB199'],
-};
-
-export function useMiniPlayerViewModel(): MiniPlayerViewModel {
-  const [track, setTrack] = useState<MiniPlayerTrack | null>(MOCK_TRACK);
+export const useMiniPlayerViewModel = (): MiniPlayerViewModel => {
+  const dispatch = useAppDispatch();
+  const track = useAppSelector(selectCurrentTrack);
 
   return {
     track,
+    // TODO: real state and progress once the slice mirrors TrackPlayer events
     isPlaying: true,
-    progress: 0.35,
-    stop: () => setTrack(null),
+    progress: 0,
+    // TODO: stop the engine too, not just hide the bar
+    stop: () => dispatch(cleared()),
   };
-}
+};

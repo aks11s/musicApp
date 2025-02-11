@@ -1,13 +1,15 @@
-import React from 'react';
-import {Text, TouchableOpacity, View} from 'react-native';
+import React, {useMemo} from 'react';
+import {Image, Text, TouchableOpacity, View} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
-import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {toImageSource} from '../../shared/lib/imageSource';
 import {useMiniPlayerViewModel} from '../viewmodels/useMiniPlayerViewModel';
 
-export function MiniPlayerBar(): React.JSX.Element | null {
+export const MiniPlayerBar = (): React.JSX.Element | null => {
   const {styles, theme} = useStyles(stylesheet);
   const {track, isPlaying, progress, stop} = useMiniPlayerViewModel();
+  const artworkUrl = track?.artworkUrl ?? '';
+  const artwork = useMemo(() => toImageSource(artworkUrl), [artworkUrl]);
 
   if (!track) {
     return null;
@@ -15,12 +17,7 @@ export function MiniPlayerBar(): React.JSX.Element | null {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={track.gradient}
-        start={{x: 0, y: 0}}
-        end={{x: 1, y: 1}}
-        style={styles.artwork}
-      />
+      <Image source={artwork} style={styles.artwork} />
       <View style={styles.info}>
         <Text style={styles.title} numberOfLines={1}>
           {track.title}
@@ -46,7 +43,7 @@ export function MiniPlayerBar(): React.JSX.Element | null {
       </View>
     </View>
   );
-}
+};
 
 const stylesheet = createStyleSheet(theme => ({
   container: {
@@ -69,6 +66,7 @@ const stylesheet = createStyleSheet(theme => ({
     width: 46,
     height: 46,
     borderRadius: 11,
+    backgroundColor: theme.colors.surface,
   },
   info: {
     flex: 1,

@@ -31,3 +31,8 @@ const playerSlice = createSlice({
 
 export const {queueStarted, playbackFailed, cleared} = playerSlice.actions;
 export const playerReducer = playerSlice.reducer;
+
+export const selectCurrentTrack = (state: {player: PlayerState}): Track | null => {
+  const {queue, currentIndex} = state.player;
+  return currentIndex === null ? null : queue[currentIndex] ?? null;
+};
