@@ -1,5 +1,5 @@
 import type {Track} from '../../domain/types';
-import {cleared, playerReducer, queueStarted} from './playerSlice';
+import {cleared, playbackFailed, playerReducer, queueStarted} from './playerSlice';
 
 const makeTrack = (id: string): Track => ({
   id,
@@ -16,7 +16,7 @@ describe('playerSlice', () => {
   it('starts with an empty queue and no current track', () => {
     const state = playerReducer(undefined, {type: 'init'});
 
-    expect(state).toEqual({queue: [], currentIndex: null});
+    expect(state).toEqual({queue: [], currentIndex: null, error: null});
   });
 
   it('replaces the queue and points at the start index', () => {
@@ -38,6 +38,29 @@ describe('playerSlice', () => {
     const playing = playerReducer(undefined, queueStarted({tracks, startIndex: 1}));
     const state = playerReducer(playing, cleared());
 
-    expect(state).toEqual({queue: [], currentIndex: null});
+    expect(state).toEqual({queue: [], currentIndex: null, error: null});
+  });
+
+  it('keeps the queue when playback fails', () => {
+    const playing = playerReducer(undefined, queueStarted({tracks, startIndex: 1}));
+    const state = playerReducer(playing, playbackFailed('Network request failed'));
+
+    expect(state.error).toBe('Network request failed');
+    expect(state.queue).toEqual(tracks);
+    expect(state.currentIndex).toBe(1);
+  });
+
+  it('clears a previous error when a new queue starts', () => {
+    const failed = playerReducer(undefined, playbackFailed('Network request failed'));
+    const state = playerReducer(failed, queueStarted({tracks, startIndex: 0}));
+
+    expect(state.error).toBeNull();
+  });
+
+  it('clears the error together with the queue', () => {
+    const failed = playerReducer(undefined, playbackFailed('Network request failed'));
+    const state = playerReducer(failed, cleared());
+
+    expect(state.error).toBeNull();
   });
 });
