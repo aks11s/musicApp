@@ -1,6 +1,13 @@
-import TrackPlayer, {Capability, type Track as PlayerTrack} from 'react-native-track-player';
+import TrackPlayer, {
+  Capability,
+  Event,
+  State,
+  type Track as PlayerTrack,
+} from 'react-native-track-player';
 import type {Track} from '../../domain/types';
 import {getTrackStreamUrl} from '../api/tracks';
+
+export type EngineState = 'idle' | 'buffering' | 'playing' | 'paused' | 'ended' | 'error';
 
 let setupPromise: Promise<void> | null = null;
 
@@ -74,3 +81,29 @@ export const playQueue = async (tracks: Track[], startIndex: number): Promise<vo
 export const play = (): Promise<void> => TrackPlayer.play();
 
 export const pause = (): Promise<void> => TrackPlayer.pause();
+
+const toEngineState = (state: State): EngineState => {
+  switch (state) {
+    case State.Playing:
+      return 'playing';
+    case State.Paused:
+    case State.Ready:
+      return 'paused';
+    case State.Loading:
+    case State.Buffering:
+      return 'buffering';
+    case State.Ended:
+      return 'ended';
+    case State.Error:
+      return 'error';
+    default:
+      return 'idle';
+  }
+};
+
+export const onStateChanged = (listener: (state: EngineState) => void): (() => void) => {
+  const subscription = TrackPlayer.addEventListener(Event.PlaybackState, event =>
+    listener(toEngineState(event.state)),
+  );
+  return () => subscription.remove();
+};
