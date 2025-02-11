@@ -38,11 +38,35 @@ const toPlayerTrack = async (track: Track): Promise<PlayerTrack> => ({
   duration: track.durationSeconds,
 });
 
+// app-wide, not per hook: taps from different screens race each other too
+let latestRequest = 0;
+
 export const playQueue = async (tracks: Track[], startIndex: number): Promise<void> => {
-  // lazy setup: always runs on a user tap, so Android never sees it from the background
-  await setupPlayer();
-  const queue = await Promise.all(tracks.map(toPlayerTrack));
-  await TrackPlayer.setQueue(queue);
-  await TrackPlayer.skip(startIndex);
-  await TrackPlayer.play();
+  const request = ++latestRequest;
+  const isStale = () => request !== latestRequest;
+
+  try {
+    // lazy setup: always runs on a user tap, so Android never sees it from the background
+    await setupPlayer();
+    const queue = await Promise.all(tracks.map(toPlayerTrack));
+    if (isStale()) {
+      return;
+    }
+    await TrackPlayer.setQueue(queue);
+    if (isStale()) {
+      return;
+    }
+    await TrackPlayer.skip(startIndex);
+    if (isStale()) {
+      return;
+    }
+    await TrackPlayer.play();
+  } catch (error) {
+    if (isStale()) {
+      return;
+    }
+    // a failed tap must not leave the previous queue playing under the new one
+    await TrackPlayer.reset().catch(() => undefined);
+    throw error;
+  }
 };
