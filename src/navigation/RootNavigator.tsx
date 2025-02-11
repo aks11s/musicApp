@@ -3,6 +3,7 @@ import {View} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
+import {usePlayerEventsSync} from '../player/viewmodels/usePlayerEventsSync';
 import {MiniPlayerBar} from '../player/views/MiniPlayerBar';
 import {TabNavigator} from './TabNavigator';
 import type {RootStackParamList} from './types';
@@ -10,9 +11,10 @@ import {useTabBarHeight} from './useTabBarHeight';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-export function RootNavigator(): React.JSX.Element {
+export const RootNavigator = (): React.JSX.Element => {
   const {styles} = useStyles(stylesheet);
   const tabBarHeight = useTabBarHeight();
+  usePlayerEventsSync();
 
   return (
     <View style={styles.root}>
@@ -28,7 +30,7 @@ export function RootNavigator(): React.JSX.Element {
       </View>
     </View>
   );
-}
+};
 
 const stylesheet = createStyleSheet(_theme => ({
   root: {

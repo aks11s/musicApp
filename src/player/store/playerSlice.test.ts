@@ -5,6 +5,7 @@ import {
   playerReducer,
   queueStarted,
   selectCurrentTrack,
+  statusChanged,
 } from './playerSlice';
 
 const makeTrack = (id: string): Track => ({
@@ -22,7 +23,7 @@ describe('playerSlice', () => {
   it('starts with an empty queue and no current track', () => {
     const state = playerReducer(undefined, {type: 'init'});
 
-    expect(state).toEqual({queue: [], currentIndex: null, error: null});
+    expect(state).toEqual({queue: [], currentIndex: null, status: 'idle', error: null});
   });
 
   it('replaces the queue and points at the start index', () => {
@@ -44,7 +45,7 @@ describe('playerSlice', () => {
     const playing = playerReducer(undefined, queueStarted({tracks, startIndex: 1}));
     const state = playerReducer(playing, cleared());
 
-    expect(state).toEqual({queue: [], currentIndex: null, error: null});
+    expect(state).toEqual({queue: [], currentIndex: null, status: 'idle', error: null});
   });
 
   it('keeps the queue when playback fails', () => {
@@ -61,6 +62,18 @@ describe('playerSlice', () => {
     const state = playerReducer(failed, queueStarted({tracks, startIndex: 0}));
 
     expect(state.error).toBeNull();
+  });
+
+  it('tracks the engine status', () => {
+    const state = playerReducer(undefined, statusChanged('buffering'));
+
+    expect(playerReducer(state, statusChanged('playing')).status).toBe('playing');
+  });
+
+  it('resets the status when cleared', () => {
+    const playing = playerReducer(undefined, statusChanged('playing'));
+
+    expect(playerReducer(playing, cleared()).status).toBe('idle');
   });
 
   it('clears the error together with the queue', () => {
