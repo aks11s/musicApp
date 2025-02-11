@@ -7,7 +7,12 @@ export const usePlayerEventsSync = (): void => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    onStateChanged(state => dispatch(statusChanged(state)));
-    onActiveTrackChanged(index => dispatch(activeTrackChanged(index)));
+    const unsubscribeState = onStateChanged(state => dispatch(statusChanged(state)));
+    const unsubscribeTrack = onActiveTrackChanged(index => dispatch(activeTrackChanged(index)));
+
+    return () => {
+      unsubscribeState();
+      unsubscribeTrack();
+    };
   }, [dispatch]);
 };
