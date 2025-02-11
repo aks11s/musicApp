@@ -38,8 +38,9 @@ const toPlayerTrack = async (track: Track): Promise<PlayerTrack> => ({
   duration: track.durationSeconds,
 });
 
-
 export const playQueue = async (tracks: Track[], startIndex: number): Promise<void> => {
+  // lazy setup: always runs on a user tap, so Android never sees it from the background
+  await setupPlayer();
   const queue = await Promise.all(tracks.map(toPlayerTrack));
   await TrackPlayer.setQueue(queue);
   await TrackPlayer.skip(startIndex);
