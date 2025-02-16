@@ -18,7 +18,7 @@ const mockGetTrackStreamUrl = jest.fn();
 jest.mock('react-native-track-player', () => ({
   __esModule: true,
   default: mockPlayer,
-  Capability: {Play: 'play', Pause: 'pause'},
+  Capability: {Play: 'play', Pause: 'pause', SkipToNext: 'skip-to-next', SkipToPrevious: 'skip-to-previous'},
 }));
 
 jest.mock('../api/tracks', () => ({

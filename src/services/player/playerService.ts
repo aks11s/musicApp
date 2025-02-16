@@ -22,8 +22,13 @@ const initPlayer = async (): Promise<void> => {
   }
 
   await TrackPlayer.updateOptions({
-    capabilities: [Capability.Play, Capability.Pause],
-    compactCapabilities: [Capability.Play, Capability.Pause],
+    capabilities: [
+      Capability.Play,
+      Capability.Pause,
+      Capability.SkipToNext,
+      Capability.SkipToPrevious,
+    ],
+    compactCapabilities: [Capability.Play, Capability.Pause, Capability.SkipToNext],
   });
 };
 
