@@ -56,5 +56,7 @@ export const ALBUM_GRID_GAP = 10;
 export const ALBUMS_SKELETON_COUNT = 4;
 
 export const RECENTLY_PLAYED_LIMIT = 20;
+// a track only counts as played once it stayed on for a moment, not while skipping past it
+export const RECENTLY_PLAYED_MIN_MS = 1500;
 export const TRACK_CARD_SIZE = 128;
 export const RECENTLY_PLAYED_CARD_SIZE = 112;
