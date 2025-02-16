@@ -7,6 +7,11 @@ const mockPlayer = {
   skip: jest.fn(),
   play: jest.fn(),
   reset: jest.fn(),
+  getActiveTrackIndex: jest.fn(),
+  getTrack: jest.fn(),
+  getProgress: jest.fn(),
+  load: jest.fn(),
+  seekTo: jest.fn(),
 };
 const mockGetTrackStreamUrl = jest.fn();
 
@@ -163,5 +168,52 @@ describe('playQueue', () => {
     const {playQueue} = loadService();
 
     await expect(playQueue([makeTrack('a')], 0)).rejects.toThrow('setup failed');
+  });
+});
+
+describe('reloadActiveTrack', () => {
+  const activeTrack = {id: 'a', url: 'https://node/a?old', title: 'Track a'};
+
+  beforeEach(() => {
+    mockPlayer.getActiveTrackIndex.mockResolvedValue(3);
+    mockPlayer.getTrack.mockResolvedValue(activeTrack);
+    mockPlayer.getProgress.mockResolvedValue({position: 42, duration: 180, buffered: 60});
+    mockGetTrackStreamUrl.mockResolvedValue('https://node/a?fresh');
+  });
+
+  it('swaps in a fresh stream url and resumes where it stopped', async () => {
+    const {reloadActiveTrack} = loadService();
+
+    await reloadActiveTrack();
+
+    expect(mockPlayer.getTrack).toHaveBeenCalledWith(3);
+    expect(mockPlayer.load).toHaveBeenCalledWith({...activeTrack, url: 'https://node/a?fresh'});
+    expect(mockPlayer.seekTo).toHaveBeenCalledWith(42);
+    expect(mockPlayer.play).toHaveBeenCalled();
+  });
+
+  it('does nothing when no track is active', async () => {
+    mockPlayer.getActiveTrackIndex.mockResolvedValue(undefined);
+    const {reloadActiveTrack} = loadService();
+
+    await reloadActiveTrack();
+
+    expect(mockPlayer.load).not.toHaveBeenCalled();
+  });
+
+  it('backs off when the user started something else meanwhile', async () => {
+    const slowUrl = deferred<string>();
+    mockGetTrackStreamUrl.mockReturnValueOnce(slowUrl.promise);
+    const {reloadActiveTrack, stop} = loadService();
+
+    const reload = reloadActiveTrack();
+    await new Promise(resolve => setImmediate(resolve));
+    expect(mockGetTrackStreamUrl).toHaveBeenCalled();
+    await stop();
+    slowUrl.resolve('https://node/a?fresh');
+    await reload;
+
+    expect(mockPlayer.load).not.toHaveBeenCalled();
+    expect(mockPlayer.play).not.toHaveBeenCalled();
   });
 });

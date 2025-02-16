@@ -83,6 +83,26 @@ export const play = (): Promise<void> => TrackPlayer.play();
 
 export const pause = (): Promise<void> => TrackPlayer.pause();
 
+export const reloadActiveTrack = async (): Promise<void> => {
+  const request = latestRequest;
+  const isStale = () => request !== latestRequest;
+
+  const index = await TrackPlayer.getActiveTrackIndex();
+  const active = index === undefined ? undefined : await TrackPlayer.getTrack(index);
+  if (!active || isStale()) {
+    return;
+  }
+  const {position} = await TrackPlayer.getProgress();
+  const url = await getTrackStreamUrl(String(active.id));
+  if (isStale()) {
+    return;
+  }
+
+  await TrackPlayer.load({...active, url});
+  await TrackPlayer.seekTo(position);
+  await TrackPlayer.play();
+};
+
 export const stop = (): Promise<void> => {
   latestRequest++;
   return TrackPlayer.reset();
