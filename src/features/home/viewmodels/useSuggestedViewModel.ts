@@ -8,6 +8,7 @@ import {TOP_ARTISTS_LIMIT, UNDERGROUND_TRACKS_LIMIT} from '../models/constants';
 import {getRecentlyPlayed} from '../models/recentlyPlayed.repository';
 import {selectMostPopularArtists} from '../models/selectors';
 import type {Artist, Track} from '../../../domain/types';
+import {usePlayTracks} from '../../../player/viewmodels/usePlayTracks';
 
 export type SuggestedViewModel = {
   recentlyPlayed: Track[];
@@ -21,6 +22,9 @@ export type SuggestedViewModel = {
   underground: Track[];
   isUndergroundLoading: boolean;
   isUndergroundError: boolean;
+  playRecentlyPlayed: (index: number) => void;
+  playMostPlayed: (index: number) => void;
+  playUnderground: (index: number) => void;
 };
 
 export const useSuggestedViewModel = (): SuggestedViewModel => {
@@ -32,6 +36,7 @@ export const useSuggestedViewModel = (): SuggestedViewModel => {
     useGetTopArtistsQuery(TOP_ARTISTS_LIMIT);
   const {data: underground, isLoading: isUndergroundLoading, isError: isUndergroundError} =
     useGetUndergroundTracksQuery(UNDERGROUND_TRACKS_LIMIT);
+  const playTracks = usePlayTracks();
 
   return {
     recentlyPlayed,
@@ -45,5 +50,8 @@ export const useSuggestedViewModel = (): SuggestedViewModel => {
     underground: underground ?? [],
     isUndergroundLoading,
     isUndergroundError,
+    playRecentlyPlayed: index => playTracks(recentlyPlayed, index),
+    playMostPlayed: index => playTracks(mostPlayed ?? [], index),
+    playUnderground: index => playTracks(underground ?? [], index),
   };
 };
