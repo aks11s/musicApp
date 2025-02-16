@@ -3,6 +3,7 @@ import TrackPlayer, {
   Event,
   State,
   type Track as PlayerTrack,
+  useProgress,
 } from 'react-native-track-player';
 import type {Track} from '../../domain/types';
 import {getTrackStreamUrl} from '../api/tracks';
@@ -113,4 +114,14 @@ export const onActiveTrackChanged = (listener: (index: number | null) => void): 
     listener(event.index ?? null),
   );
   return () => subscription.remove();
+};
+
+export type PlaybackProgress = {
+  positionSeconds: number;
+  durationSeconds: number;
+};
+
+export const usePlaybackProgress = (): PlaybackProgress => {
+  const {position, duration} = useProgress()
+  return {positionSeconds: position, durationSeconds: duration};
 };
