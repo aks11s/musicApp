@@ -1,5 +1,5 @@
 import React from 'react';
-import {Image, Text, View} from 'react-native';
+import {Image, Text, TouchableOpacity} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import type {Track} from '../../../../domain/types';
 import {toImageSource} from '../../../../shared/lib/imageSource';
@@ -7,13 +7,14 @@ import {toImageSource} from '../../../../shared/lib/imageSource';
 type TrackCardProps = {
   track: Track;
   size: number;
+  onPress?: () => void;
 };
 
-export const TrackCard = React.memo(({track, size}: TrackCardProps): React.JSX.Element => {
+export const TrackCard = React.memo(({track, size, onPress}: TrackCardProps): React.JSX.Element => {
   const {styles} = useStyles(stylesheet);
 
   return (
-    <View style={styles.card(size)}>
+    <TouchableOpacity style={styles.card(size)} onPress={onPress} disabled={!onPress}>
       <Image source={toImageSource(track.artworkUrl)} style={styles.artwork(size)} />
       <Text style={styles.title} numberOfLines={1}>
         {track.title}
@@ -21,7 +22,7 @@ export const TrackCard = React.memo(({track, size}: TrackCardProps): React.JSX.E
       <Text style={styles.artist} numberOfLines={1}>
         {track.artist}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 });
 

@@ -24,14 +24,22 @@ export const SuggestedTab = (): React.JSX.Element => {
     underground,
     isUndergroundLoading,
     isUndergroundError,
+    playRecentlyPlayed,
+    playMostPlayed,
+    playUnderground,
   } = useSuggestedViewModel();
 
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       {hasRecentlyPlayed ? (
         <HorizontalSection title="Recently Played" gap={theme.spacing.md + 2} isFirst>
-          {recentlyPlayed.map(track => (
-            <TrackCard key={track.id} track={track} size={RECENTLY_PLAYED_CARD_SIZE} />
+          {recentlyPlayed.map((track, index) => (
+            <TrackCard
+              key={track.id}
+              track={track}
+              size={RECENTLY_PLAYED_CARD_SIZE}
+              onPress={() => playRecentlyPlayed(index)}
+            />
           ))}
         </HorizontalSection>
       ) : null}
@@ -46,8 +54,8 @@ export const SuggestedTab = (): React.JSX.Element => {
         isEmpty={mostPlayed.length === 0}
         empty={<EmptyState icon="musical-note-outline" text="No tracks right now" />}
         isFirst={!hasRecentlyPlayed}>
-        {mostPlayed.map(track => (
-          <TrackCard key={track.id} track={track} size={TRACK_CARD_SIZE} />
+        {mostPlayed.map((track, index) => (
+          <TrackCard key={track.id} track={track} size={TRACK_CARD_SIZE} onPress={() => playMostPlayed(index)} />
         ))}
       </HorizontalSection>
 
@@ -75,8 +83,13 @@ export const SuggestedTab = (): React.JSX.Element => {
         isEmpty={underground.length === 0}
         empty={<EmptyState icon="musical-note-outline" text="No tracks right now" />}
         hideSeeAll>
-        {underground.map(track => (
-          <TrackCard key={track.id} track={track} size={TRACK_CARD_SIZE} />
+        {underground.map((track, index) => (
+          <TrackCard
+            key={track.id}
+            track={track}
+            size={TRACK_CARD_SIZE}
+            onPress={() => playUnderground(index)}
+          />
         ))}
       </HorizontalSection>
     </ScrollView>
