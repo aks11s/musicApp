@@ -2,6 +2,7 @@ import {useCallback} from 'react';
 import {useAppDispatch, useAppSelector} from '../../app/hooks';
 import {pause, play, stop, usePlaybackProgress} from '../../services/player/playerService';
 import {toErrorMessage} from '../../shared/lib/errors';
+import {PLAYBACK_ERROR_TEXT} from '../models/constants';
 import {toProgressRatio} from '../models/formatters';
 import {cleared, playbackFailed, selectCurrentTrack} from '../store/playerSlice';
 
@@ -14,6 +15,8 @@ export type MiniPlayerTrack = {
 
 export type MiniPlayerViewModel = {
   track: MiniPlayerTrack | null;
+  subtitle: string;
+  hasError: boolean;
   isPlaying: boolean;
   progress: number;
   togglePlayback: () => void;
@@ -24,6 +27,7 @@ export const useMiniPlayerViewModel = (): MiniPlayerViewModel => {
   const dispatch = useAppDispatch();
   const track = useAppSelector(selectCurrentTrack);
   const isPlaying = useAppSelector(state => state.player.status === 'playing');
+  const error = useAppSelector(state => state.player.error);
   const {positionSeconds, durationSeconds} = usePlaybackProgress();
 
   const togglePlayback = useCallback(async () => {
@@ -41,6 +45,8 @@ export const useMiniPlayerViewModel = (): MiniPlayerViewModel => {
 
   return {
     track,
+    subtitle: error ? PLAYBACK_ERROR_TEXT : track?.artist ?? '',
+    hasError: error !== null,
     isPlaying,
     progress: toProgressRatio(positionSeconds, durationSeconds),
     togglePlayback,

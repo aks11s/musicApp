@@ -7,7 +7,8 @@ import {useMiniPlayerViewModel} from '../viewmodels/useMiniPlayerViewModel';
 
 export const MiniPlayerBar = (): React.JSX.Element | null => {
   const {styles, theme} = useStyles(stylesheet);
-  const {track, isPlaying, progress, togglePlayback, stop} = useMiniPlayerViewModel();
+  const {track, subtitle, hasError, isPlaying, progress, togglePlayback, stop} =
+    useMiniPlayerViewModel();
   const artworkUrl = track?.artworkUrl ?? '';
   const artwork = useMemo(() => toImageSource(artworkUrl), [artworkUrl]);
 
@@ -22,8 +23,8 @@ export const MiniPlayerBar = (): React.JSX.Element | null => {
         <Text style={styles.title} numberOfLines={1}>
           {track.title}
         </Text>
-        <Text style={styles.artist} numberOfLines={1}>
-          {track.artist}
+        <Text style={[styles.artist, hasError && styles.error]} numberOfLines={1}>
+          {subtitle}
         </Text>
       </View>
       <TouchableOpacity
@@ -82,6 +83,9 @@ const stylesheet = createStyleSheet(theme => ({
     fontFamily: theme.typography.families.regular,
     fontSize: theme.typography.sizes.caption,
     color: theme.colors.textMuted,
+  },
+  error: {
+    color: theme.colors.danger,
   },
   playButton: {
     width: 40,
