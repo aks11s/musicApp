@@ -143,6 +143,20 @@ describe('playQueue', () => {
     expect(mockPlayer.setQueue).not.toHaveBeenCalled();
   });
 
+  it('does not start playing a tap that was still loading when stop was called', async () => {
+    const slowUrl = deferred<string>();
+    mockGetTrackStreamUrl.mockReturnValue(slowUrl.promise);
+    const {playQueue, stop} = loadService();
+
+    const pending = playQueue([makeTrack('a')], 0);
+    await stop();
+    slowUrl.resolve('https://node/a');
+    await pending;
+
+    expect(mockPlayer.setQueue).not.toHaveBeenCalled();
+    expect(mockPlayer.play).not.toHaveBeenCalled();
+  });
+
   it('still rethrows the original error when reset fails too', async () => {
     mockPlayer.setupPlayer.mockRejectedValue(new Error('setup failed'));
     mockPlayer.reset.mockRejectedValue(new Error('player not initialized'));

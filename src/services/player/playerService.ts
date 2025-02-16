@@ -83,6 +83,11 @@ export const play = (): Promise<void> => TrackPlayer.play();
 
 export const pause = (): Promise<void> => TrackPlayer.pause();
 
+export const stop = (): Promise<void> => {
+  latestRequest++;
+  return TrackPlayer.reset();
+};
+
 const toEngineState = (state: State): EngineState => {
   switch (state) {
     case State.Playing:
