@@ -25,3 +25,12 @@ export const setObject = <T>(key: StorageKey, value: T): void => {
 export const remove = (key: StorageKey): void => {
   mmkv.delete(key);
 };
+
+export const subscribe = (key: StorageKey, onChange: () => void): (() => void) => {
+  const listener = mmkv.addOnValueChangedListener(changedKey => {
+    if (changedKey === key) {
+      onChange();
+    }
+  });
+  return () => listener.remove();
+};
