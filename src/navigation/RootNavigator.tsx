@@ -4,6 +4,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import {usePlayerEventsSync} from '../player/viewmodels/usePlayerEventsSync';
+import {useStreamRetry} from '../player/viewmodels/useStreamRetry';
 import {MiniPlayerBar} from '../player/views/MiniPlayerBar';
 import {TabNavigator} from './TabNavigator';
 import type {RootStackParamList} from './types';
@@ -15,6 +16,7 @@ export const RootNavigator = (): React.JSX.Element => {
   const {styles} = useStyles(stylesheet);
   const tabBarHeight = useTabBarHeight();
   usePlayerEventsSync();
+  useStreamRetry();
 
   return (
     <View style={styles.root}>
