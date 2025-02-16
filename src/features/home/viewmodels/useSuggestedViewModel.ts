@@ -1,11 +1,11 @@
-import {useState} from 'react';
+import {useSyncExternalStore} from 'react';
 import {
   useGetTrendingTracksQuery,
   useGetUndergroundTracksQuery,
 } from '../../../services/api/tracks';
 import {useGetTopArtistsQuery} from '../../../services/api/users';
 import {TOP_ARTISTS_LIMIT, UNDERGROUND_TRACKS_LIMIT} from '../models/constants';
-import {getRecentlyPlayed} from '../models/recentlyPlayed.repository';
+import {getRecentlyPlayed, subscribeRecentlyPlayed} from '../models/recentlyPlayed.repository';
 import {selectMostPopularArtists} from '../models/selectors';
 import type {Artist, Track} from '../../../domain/types';
 import {usePlayTracks} from '../../../player/viewmodels/usePlayTracks';
@@ -29,7 +29,7 @@ export type SuggestedViewModel = {
 
 export const useSuggestedViewModel = (): SuggestedViewModel => {
 
-  const [recentlyPlayed] = useState(getRecentlyPlayed);
+  const recentlyPlayed = useSyncExternalStore(subscribeRecentlyPlayed, getRecentlyPlayed);
   const {data: mostPlayed, isLoading: isMostPlayedLoading, isError: isMostPlayedError} =
     useGetTrendingTracksQuery();
   const {data: artists, isLoading: isArtistsLoading, isError: isArtistsError} =
