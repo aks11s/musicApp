@@ -7,9 +7,10 @@ import {playbackFailed} from '../store/playerSlice';
 import {useStreamRetry} from './useStreamRetry';
 
 const mockDispatch = jest.fn();
-const mockPlayerState: {queue: Track[]; currentIndex: number | null} = {
+const mockPlayerState: {queue: Track[]; currentIndex: number | null; status: string} = {
   queue: [],
   currentIndex: null,
+  status: 'idle',
 };
 
 jest.mock('../../app/hooks', () => ({
@@ -39,6 +40,16 @@ const emitError = async (message = 'stream failed') => {
   });
 };
 
+const raiseError = (message = 'stream failed') => {
+  mockOnPlaybackError.mock.calls[0][0](message);
+};
+
+const fireTimers = async () => {
+  await act(async () => {
+    jest.runOnlyPendingTimers();
+  });
+};
+
 const exhaustRetries = async () => {
   for (let i = 0; i < MAX_STREAM_RETRIES; i++) {
     await emitError();
@@ -50,6 +61,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockPlayerState.queue = [];
   mockPlayerState.currentIndex = 0;
+  mockPlayerState.status = 'idle';
   mockOnPlaybackError.mockReturnValue(unsubscribe);
   mockReresolve.mockResolvedValue('https://api.audius.co');
   mockReload.mockResolvedValue(undefined);
@@ -153,5 +165,171 @@ describe('useStreamRetry', () => {
 
     expect(mockReload).toHaveBeenCalledTimes(MAX_STREAM_RETRIES * 2);
     expect(mockDispatch).toHaveBeenCalledWith(playbackFailed('still broken'));
+  });
+
+  it('gives the next error a fresh retry once playback is playing again', async () => {
+    const {rerender} = renderHook(() => useStreamRetry());
+    await exhaustRetries();
+
+    mockPlayerState.status = 'playing';
+    rerender({});
+    await emitError();
+
+    expect(mockReload).toHaveBeenCalledTimes(MAX_STREAM_RETRIES + 1);
+    expect(mockDispatch).not.toHaveBeenCalled();
+  });
+
+  it('survives repeated stalls on one track as long as playback recovers in between', async () => {
+    mockPlayerState.status = 'playing';
+    const {rerender} = renderHook(() => useStreamRetry());
+
+    for (let stall = 0; stall < MAX_STREAM_RETRIES + 2; stall++) {
+      mockPlayerState.status = 'buffering';
+      rerender({});
+      await emitError();
+      mockPlayerState.status = 'playing';
+      rerender({});
+    }
+
+    expect(mockReload).toHaveBeenCalledTimes(MAX_STREAM_RETRIES + 2);
+    expect(mockDispatch).not.toHaveBeenCalled();
+  });
+
+  it('still runs out of retries after a recovery', async () => {
+    const {rerender} = renderHook(() => useStreamRetry());
+    mockPlayerState.status = 'playing';
+    rerender({});
+    await exhaustRetries();
+
+    await emitError('still broken');
+
+    expect(mockReload).toHaveBeenCalledTimes(MAX_STREAM_RETRIES);
+    expect(mockDispatch).toHaveBeenCalledWith(playbackFailed('still broken'));
+  });
+
+  it.each(['buffering', 'paused'])('does not reset the retries when status goes to %s', async status => {
+    mockPlayerState.status = 'playing';
+    const {rerender} = renderHook(() => useStreamRetry());
+    await exhaustRetries();
+
+    mockPlayerState.status = status;
+    rerender({});
+    await emitError('still broken');
+
+    expect(mockReload).toHaveBeenCalledTimes(MAX_STREAM_RETRIES);
+    expect(mockDispatch).toHaveBeenCalledWith(playbackFailed('still broken'));
+  });
+
+  it('does not reset on every render while status stays playing', async () => {
+    mockPlayerState.status = 'playing';
+    const {rerender} = renderHook(() => useStreamRetry());
+    await exhaustRetries();
+
+    rerender({});
+    rerender({});
+    await emitError('still broken');
+
+    expect(mockReload).toHaveBeenCalledTimes(MAX_STREAM_RETRIES);
+    expect(mockDispatch).toHaveBeenCalledWith(playbackFailed('still broken'));
+  });
+
+  it('reloads with resume when the status is not paused at timer time', async () => {
+    mockPlayerState.status = 'buffering';
+    renderHook(() => useStreamRetry());
+
+    await emitError();
+
+    expect(mockReload).toHaveBeenCalledWith(true);
+  });
+
+  it('reloads without resume when the user paused during the retry window', async () => {
+    mockPlayerState.status = 'playing';
+    const {rerender} = renderHook(() => useStreamRetry());
+
+    raiseError();
+    mockPlayerState.status = 'paused';
+    rerender({});
+    await fireTimers();
+
+    expect(mockReload).toHaveBeenCalledTimes(1);
+    expect(mockReload).toHaveBeenCalledWith(false);
+  });
+
+  it('reloads with resume when the user resumed during the retry window', async () => {
+    mockPlayerState.status = 'paused';
+    const {rerender} = renderHook(() => useStreamRetry());
+
+    raiseError();
+    mockPlayerState.status = 'buffering';
+    rerender({});
+    await fireTimers();
+
+    expect(mockReload).toHaveBeenCalledWith(true);
+  });
+
+  it('reloads only once when a second error arrives before the timer fires', async () => {
+    renderHook(() => useStreamRetry());
+
+    raiseError();
+    raiseError();
+    await fireTimers();
+
+    expect(mockReresolve).toHaveBeenCalledTimes(1);
+    expect(mockReload).toHaveBeenCalledTimes(1);
+  });
+
+  it('drops a pending retry when currentIndex changes', async () => {
+    const {rerender} = renderHook(() => useStreamRetry());
+
+    raiseError();
+    mockPlayerState.currentIndex = 1;
+    rerender({});
+    await fireTimers();
+
+    expect(mockReresolve).not.toHaveBeenCalled();
+    expect(mockReload).not.toHaveBeenCalled();
+  });
+
+  it('drops a pending retry when the queue changes', async () => {
+    const {rerender} = renderHook(() => useStreamRetry());
+
+    raiseError();
+    mockPlayerState.queue = [];
+    rerender({});
+    await fireTimers();
+
+    expect(mockReresolve).not.toHaveBeenCalled();
+    expect(mockReload).not.toHaveBeenCalled();
+  });
+
+  it('keeps a pending retry across a rerender that changes nothing', async () => {
+    const {rerender} = renderHook(() => useStreamRetry());
+
+    raiseError();
+    rerender({});
+    await fireTimers();
+
+    expect(mockReload).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries an error that comes after the pending one was dropped', async () => {
+    const {rerender} = renderHook(() => useStreamRetry());
+
+    raiseError();
+    mockPlayerState.currentIndex = 1;
+    rerender({});
+    await emitError();
+
+    expect(mockReload).toHaveBeenCalledTimes(1);
+  });
+
+  it('drops a pending retry on unmount', async () => {
+    const {unmount} = renderHook(() => useStreamRetry());
+
+    raiseError();
+    unmount();
+    await fireTimers();
+
+    expect(mockReload).not.toHaveBeenCalled();
   });
 });

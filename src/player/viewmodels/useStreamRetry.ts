@@ -11,15 +11,25 @@ export const useStreamRetry = (): void => {
   const failedAttempts = useRef(0);
   const queue = useAppSelector(state => state.player.queue);
   const currentIndex = useAppSelector(state => state.player.currentIndex);
+  const status = useAppSelector(state => state.player.status);
+  const isPlaying = status === 'playing';
+  const isPaused = useRef(false);
+  isPaused.current = status === 'paused';
+  const timer = useRef<ReturnType<typeof setTimeout>>();
 
   // not on the engine's track event: reloadActiveTrack fires it too, and the retries would never run out
   useEffect(() => {
     failedAttempts.current = 0;
+    clearTimeout(timer.current);
   }, [queue, currentIndex]);
 
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    if (isPlaying) {
+      failedAttempts.current = 0;
+    }
+  }, [isPlaying]);
 
+  useEffect(() => {
     const unsubscribe = onPlaybackError(message => {
       if (!shouldRetryStream(failedAttempts.current)) {
         dispatch(playbackFailed(message));
@@ -28,16 +38,17 @@ export const useStreamRetry = (): void => {
       const delay = streamRetryDelayMs(failedAttempts.current);
       failedAttempts.current += 1;
 
-      timer = setTimeout(() => {
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => {
         reresolveAudiusHost()
-          .then(reloadActiveTrack)
+          .then(() => reloadActiveTrack(!isPaused.current))
           .catch(error => dispatch(playbackFailed(toErrorMessage(error))));
       }, delay);
     });
 
     return () => {
       unsubscribe();
-      clearTimeout(timer);
+      clearTimeout(timer.current);
     };
   }, [dispatch]);
 };

@@ -88,7 +88,7 @@ export const play = (): Promise<void> => TrackPlayer.play();
 
 export const pause = (): Promise<void> => TrackPlayer.pause();
 
-export const reloadActiveTrack = async (): Promise<void> => {
+export const reloadActiveTrack = async (resume: boolean): Promise<void> => {
   const request = latestRequest;
   const isStale = () => request !== latestRequest;
 
@@ -105,7 +105,9 @@ export const reloadActiveTrack = async (): Promise<void> => {
 
   await TrackPlayer.load({...active, url});
   await TrackPlayer.seekTo(position);
-  await TrackPlayer.play();
+  if (resume) {
+    await TrackPlayer.play();
+  }
 };
 
 export const stop = (): Promise<void> => {

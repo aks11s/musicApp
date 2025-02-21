@@ -184,7 +184,7 @@ describe('reloadActiveTrack', () => {
   it('swaps in a fresh stream url and resumes where it stopped', async () => {
     const {reloadActiveTrack} = loadService();
 
-    await reloadActiveTrack();
+    await reloadActiveTrack(true);
 
     expect(mockPlayer.getTrack).toHaveBeenCalledWith(3);
     expect(mockPlayer.load).toHaveBeenCalledWith({...activeTrack, url: 'https://node/a?fresh'});
@@ -192,13 +192,35 @@ describe('reloadActiveTrack', () => {
     expect(mockPlayer.play).toHaveBeenCalled();
   });
 
+  it('loads and seeks but stays paused when resume is false', async () => {
+    const {reloadActiveTrack} = loadService();
+
+    await reloadActiveTrack(false);
+
+    expect(mockPlayer.load).toHaveBeenCalledWith({...activeTrack, url: 'https://node/a?fresh'});
+    expect(mockPlayer.seekTo).toHaveBeenCalledWith(42);
+    expect(mockPlayer.play).not.toHaveBeenCalled();
+  });
+
+  it('seeks only after the new url is loaded', async () => {
+    const {reloadActiveTrack} = loadService();
+
+    await reloadActiveTrack(true);
+
+    const order = [mockPlayer.load, mockPlayer.seekTo, mockPlayer.play].map(
+      fn => fn.mock.invocationCallOrder[0],
+    );
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+  });
+
   it('does nothing when no track is active', async () => {
     mockPlayer.getActiveTrackIndex.mockResolvedValue(undefined);
     const {reloadActiveTrack} = loadService();
 
-    await reloadActiveTrack();
+    await reloadActiveTrack(true);
 
     expect(mockPlayer.load).not.toHaveBeenCalled();
+    expect(mockPlayer.play).not.toHaveBeenCalled();
   });
 
   it('backs off when the user started something else meanwhile', async () => {
@@ -206,7 +228,7 @@ describe('reloadActiveTrack', () => {
     mockGetTrackStreamUrl.mockReturnValueOnce(slowUrl.promise);
     const {reloadActiveTrack, stop} = loadService();
 
-    const reload = reloadActiveTrack();
+    const reload = reloadActiveTrack(true);
     await new Promise(resolve => setImmediate(resolve));
     expect(mockGetTrackStreamUrl).toHaveBeenCalled();
     await stop();
