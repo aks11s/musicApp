@@ -75,6 +75,14 @@ describe('setupPlayer', () => {
     expect(mockPlayer.updateOptions).toHaveBeenCalled();
   });
 
+  it('lets the engine pause for calls and other audio', async () => {
+    const {setupPlayer} = loadService();
+
+    await setupPlayer();
+
+    expect(mockPlayer.setupPlayer).toHaveBeenCalledWith({autoHandleInterruptions: true});
+  });
+
   it('passes any other setup error through', async () => {
     mockPlayer.setupPlayer.mockRejectedValue({code: 'android_cannot_setup_player_in_background'});
     const {setupPlayer} = loadService();

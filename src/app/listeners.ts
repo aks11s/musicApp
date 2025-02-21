@@ -8,11 +8,14 @@ export const listenerMiddleware = createListenerMiddleware<{player: PlayerState}
 listenerMiddleware.startListening({
   actionCreator: activeTrackChanged,
   effect: async (action, listenerApi) => {
+    listenerApi.cancelActiveListeners();
     if (action.payload === null) {
       return;
     }
-    listenerApi.cancelActiveListeners();
     await listenerApi.delay(RECENTLY_PLAYED_MIN_MS);
+    if (listenerApi.getState().player.status !== 'playing') {
+      await listenerApi.condition((_, state) => state.player.status === 'playing');
+    }
 
     const track = selectCurrentTrack(listenerApi.getState());
     if (track) {

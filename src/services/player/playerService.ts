@@ -14,7 +14,7 @@ let setupPromise: Promise<void> | null = null;
 
 const initPlayer = async (): Promise<void> => {
   try {
-    await TrackPlayer.setupPlayer();
+    await TrackPlayer.setupPlayer({autoHandleInterruptions: true});
   } catch (error) {
     if ((error as {code?: string}).code !== 'player_already_initialized') {
       throw error;

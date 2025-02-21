@@ -1,7 +1,12 @@
 import {configureStore} from '@reduxjs/toolkit';
 import type {Track} from '../domain/types';
 import {RECENTLY_PLAYED_MIN_MS} from '../features/home/models/constants';
-import {activeTrackChanged, playerReducer, queueStarted} from '../player/store/playerSlice';
+import {
+  activeTrackChanged,
+  playerReducer,
+  queueStarted,
+  statusChanged,
+} from '../player/store/playerSlice';
 
 const mockAddRecentlyPlayed = jest.fn();
 
@@ -46,6 +51,7 @@ describe('recently played listener', () => {
   it('records a track reached by next or auto-advance once it stayed long enough', async () => {
     const store = makeStore();
     store.dispatch(queueStarted({tracks, startIndex: 0}));
+    store.dispatch(statusChanged('playing'));
 
     store.dispatch(activeTrackChanged(1));
     await jest.advanceTimersByTimeAsync(RECENTLY_PLAYED_MIN_MS);
@@ -57,6 +63,7 @@ describe('recently played listener', () => {
   it('records nothing before the delay has passed', async () => {
     const store = makeStore();
     store.dispatch(queueStarted({tracks, startIndex: 0}));
+    store.dispatch(statusChanged('playing'));
 
     store.dispatch(activeTrackChanged(1));
     await jest.advanceTimersByTimeAsync(RECENTLY_PLAYED_MIN_MS - 1);
@@ -67,6 +74,7 @@ describe('recently played listener', () => {
   it('records only the last track when the user skips through several quickly', async () => {
     const store = makeStore();
     store.dispatch(queueStarted({tracks, startIndex: 0}));
+    store.dispatch(statusChanged('playing'));
 
     store.dispatch(activeTrackChanged(1));
     await jest.advanceTimersByTimeAsync(RECENTLY_PLAYED_MIN_MS - 500);
@@ -80,6 +88,7 @@ describe('recently played listener', () => {
   it('restarts the delay for the new track after a switch', async () => {
     const store = makeStore();
     store.dispatch(queueStarted({tracks, startIndex: 0}));
+    store.dispatch(statusChanged('playing'));
 
     store.dispatch(activeTrackChanged(1));
     await jest.advanceTimersByTimeAsync(RECENTLY_PLAYED_MIN_MS - 500);
@@ -96,6 +105,7 @@ describe('recently played listener', () => {
   it('records each track that stays on long enough, one after another', async () => {
     const store = makeStore();
     store.dispatch(queueStarted({tracks, startIndex: 0}));
+    store.dispatch(statusChanged('playing'));
 
     store.dispatch(activeTrackChanged(1));
     await jest.advanceTimersByTimeAsync(RECENTLY_PLAYED_MIN_MS);
@@ -108,6 +118,7 @@ describe('recently played listener', () => {
   it('ignores activeTrackChanged(null)', async () => {
     const store = makeStore();
     store.dispatch(queueStarted({tracks, startIndex: 0}));
+    store.dispatch(statusChanged('playing'));
 
     store.dispatch(activeTrackChanged(null));
     await jest.advanceTimersByTimeAsync(RECENTLY_PLAYED_MIN_MS * 2);
@@ -115,16 +126,82 @@ describe('recently played listener', () => {
     expect(mockAddRecentlyPlayed).not.toHaveBeenCalled();
   });
 
-  it('does not cancel a pending record when the engine reports null', async () => {
+  it('cancels a pending record when the engine reports null', async () => {
     const store = makeStore();
     store.dispatch(queueStarted({tracks, startIndex: 0}));
+    store.dispatch(statusChanged('playing'));
 
     store.dispatch(activeTrackChanged(1));
     await jest.advanceTimersByTimeAsync(RECENTLY_PLAYED_MIN_MS - 500);
     store.dispatch(activeTrackChanged(null));
-    await jest.advanceTimersByTimeAsync(500);
+    await jest.advanceTimersByTimeAsync(RECENTLY_PLAYED_MIN_MS);
 
+    expect(mockAddRecentlyPlayed).not.toHaveBeenCalled();
+  });
+
+  it.each(['idle', 'paused', 'buffering'] as const)(
+    'does not record a track that is still %s after the delay',
+    async status => {
+      const store = makeStore();
+      store.dispatch(queueStarted({tracks, startIndex: 0}));
+      store.dispatch(statusChanged(status));
+
+      store.dispatch(activeTrackChanged(1));
+      await jest.advanceTimersByTimeAsync(RECENTLY_PLAYED_MIN_MS * 3);
+      // wakes the waiting condition so it gets evaluated against the current status
+      store.dispatch(statusChanged(status));
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(mockAddRecentlyPlayed).not.toHaveBeenCalled();
+    },
+  );
+
+  it('records the track once the status becomes playing after the delay', async () => {
+    const store = makeStore();
+    store.dispatch(queueStarted({tracks, startIndex: 0}));
+    store.dispatch(statusChanged('buffering'));
+
+    store.dispatch(activeTrackChanged(1));
+    await jest.advanceTimersByTimeAsync(RECENTLY_PLAYED_MIN_MS * 2);
+    expect(mockAddRecentlyPlayed).not.toHaveBeenCalled();
+
+    store.dispatch(statusChanged('playing'));
+    await jest.advanceTimersByTimeAsync(0);
+
+    expect(mockAddRecentlyPlayed).toHaveBeenCalledTimes(1);
     expect(mockAddRecentlyPlayed).toHaveBeenCalledWith(tracks[1]);
+  });
+
+  it('cancels a record that is waiting for playback when the track switches', async () => {
+    const store = makeStore();
+    store.dispatch(queueStarted({tracks, startIndex: 0}));
+    store.dispatch(statusChanged('buffering'));
+
+    store.dispatch(activeTrackChanged(1));
+    await jest.advanceTimersByTimeAsync(RECENTLY_PLAYED_MIN_MS);
+    store.dispatch(activeTrackChanged(2));
+    store.dispatch(statusChanged('playing'));
+    await jest.advanceTimersByTimeAsync(0);
+
+    expect(mockAddRecentlyPlayed).not.toHaveBeenCalled();
+
+    await jest.advanceTimersByTimeAsync(RECENTLY_PLAYED_MIN_MS);
+
+    expect(mockAddRecentlyPlayed.mock.calls).toEqual([[tracks[2]]]);
+  });
+
+  it('cancels a record that is waiting for playback when the engine reports null', async () => {
+    const store = makeStore();
+    store.dispatch(queueStarted({tracks, startIndex: 0}));
+    store.dispatch(statusChanged('buffering'));
+
+    store.dispatch(activeTrackChanged(1));
+    await jest.advanceTimersByTimeAsync(RECENTLY_PLAYED_MIN_MS);
+    store.dispatch(activeTrackChanged(null));
+    store.dispatch(statusChanged('playing'));
+    await jest.advanceTimersByTimeAsync(RECENTLY_PLAYED_MIN_MS * 2);
+
+    expect(mockAddRecentlyPlayed).not.toHaveBeenCalled();
   });
 
   it('records nothing for queueStarted alone, before the engine reports a track', async () => {
