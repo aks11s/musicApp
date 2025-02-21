@@ -3,10 +3,11 @@ import {ScrollView} from 'react-native';
 import {createStyleSheet, useStyles} from 'react-native-unistyles';
 import {EmptyState} from '../../../../shared/ui/EmptyState';
 import {HorizontalSection} from '../../../../shared/ui/HorizontalSection';
-import {RECENTLY_PLAYED_CARD_SIZE, TRACK_CARD_SIZE} from '../../models/constants';
+import {TRACK_CARD_SIZE} from '../../models/constants';
 import {useSuggestedViewModel} from '../../viewmodels/useSuggestedViewModel';
 import {ArtistAvatar} from '../components/ArtistAvatar';
 import {ArtistAvatarSkeletonRow} from '../loaders/ArtistAvatarSkeleton';
+import {RecentTrackCard} from '../components/RecentTrackCard';
 import {TrackCard} from '../components/TrackCard';
 import {TrackCardSkeletonRow} from '../loaders/TrackCardSkeleton';
 
@@ -32,14 +33,9 @@ export const SuggestedTab = (): React.JSX.Element => {
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       {hasRecentlyPlayed ? (
-        <HorizontalSection title="Recently Played" gap={theme.spacing.md + 2} isFirst>
+        <HorizontalSection title="Recently Played" gap={theme.spacing.md} isFirst>
           {recentlyPlayed.map((track, index) => (
-            <TrackCard
-              key={track.id}
-              track={track}
-              size={RECENTLY_PLAYED_CARD_SIZE}
-              onPress={() => playRecentlyPlayed(index)}
-            />
+            <RecentTrackCard key={track.id} track={track} onPress={() => playRecentlyPlayed(index)} />
           ))}
         </HorizontalSection>
       ) : null}
