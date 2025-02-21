@@ -87,6 +87,33 @@ describe('playerSlice', () => {
     expect(playerReducer(state, statusChanged('playing')).status).toBe('playing');
   });
 
+  it('clears the error once playback recovers', () => {
+    const playing = playerReducer(undefined, queueStarted({tracks, startIndex: 1}));
+    const failed = playerReducer(playing, playbackFailed('Network request failed'));
+    const state = playerReducer(failed, statusChanged('playing'));
+
+    expect(state.error).toBeNull();
+    expect(state.status).toBe('playing');
+    expect(state.queue).toEqual(tracks);
+    expect(state.currentIndex).toBe(1);
+  });
+
+  it('keeps the error while the retry is still buffering', () => {
+    const failed = playerReducer(undefined, playbackFailed('Network request failed'));
+    const state = playerReducer(failed, statusChanged('buffering'));
+
+    expect(state.error).toBe('Network request failed');
+    expect(state.status).toBe('buffering');
+  });
+
+  it('keeps the error when the engine pauses', () => {
+    const failed = playerReducer(undefined, playbackFailed('Network request failed'));
+    const state = playerReducer(failed, statusChanged('paused'));
+
+    expect(state.error).toBe('Network request failed');
+    expect(state.status).toBe('paused');
+  });
+
   it('resets the status when cleared', () => {
     const playing = playerReducer(undefined, statusChanged('playing'));
 

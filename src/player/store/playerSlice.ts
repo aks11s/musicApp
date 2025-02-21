@@ -32,6 +32,9 @@ const playerSlice = createSlice({
     },
     statusChanged: (state, action: PayloadAction<EngineState>) => {
       state.status = action.payload;
+      if (action.payload === 'playing') {
+        state.error = null;
+      }
     },
     playbackFailed: (state, action: PayloadAction<string>) => {
       state.error = action.payload;
